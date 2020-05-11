@@ -17,6 +17,44 @@ Type Shift is intentionally focused on uni-directional conversions. This makes i
 
 ## Usage
 
+### Converting a Value
+Converters have 3 different methods for converting values depending on your needs.
+- `convert` Takes a value and returns a value or throws and Error. In most cases this is the best option.
+- `tryConvert` Take a value and returns a `ConverterResult` which is either successful with a value or not successful with errors. If you're building an API and want to respond with a 400 error with the issues this may be easier to use.
+- `tryConvertNode` Takes a node and returns a `ConverterResult` of a Node. If you're writing your own subclass of Converter you must implement this method, however generally you should never need to call it or implement it.
+
+### Creating a Converter
+Creating a converter is generally done through composition. This is accomplished via the `pipe` and `default` methods on the Converter class.
+
+```ts
+import * as t from 'type-shift';
+
+// use pipe to chain converters, pipe takes either another Converter or a function
+// when passing a function it will be called with the value resulting from the previous
+// converter.
+const numberAsString = t.string.pipe(s => {
+  // check that this is actually a number
+  const n = Number(s);
+  if (isNaN(n)) {
+    // A converter error with appropriate data will be created for us
+    // If we wanted to surface our own values for the expected and actual
+    // values we could throw an error with those fields, such as an AssertionError
+    throw new Error();
+  }
+  return n;
+}, 'numberAsString');
+
+// default specifies a value, (or converter) to use in place of a missing input
+// the value is passed through the converter it is defined on so you should specify
+// a default input to the converter, not a default result.
+export const valueObject = t.strict({ value: numberAsString.default('0') });
+```
+
+### Built-in converters
+The Following converters are shipped with Type Shift
+- `never` fails to convert any value except the missing value
+- `unknown` successfully converts any present value
+
 ### Advanced
 #### Nodes
 You should generally never need to interact with the node class unless you're extending Converter.
@@ -85,3 +123,6 @@ export class SetConverter<T> implements t.Converter<Set<T>, unknown> {
 Because Type Shift is about transforming data it is often useful to be able to pull data from other fields in an input. To enable this we represent the value passed to converters as a Node in a Tree. Nodes have a parent, value, and path. Converters can use the data in a Node to traverse the tree to find values. The path data encoded in the node is useful for ensuring that error messages are specific about what field is incorrect. Nodes represent either present or missing data, allowing them to encode the fact that a field that was requested on an input was not found, and allowing converters downstream to take appropriate action.
 
 Nodes use **Navigation** to represent the part of the path they are at. Navigation is a way of encoding both the string representation of a path and how to get from one node to another. For instance the `RootNavigation` can walk up the tree of Nodes to reach the root, while the `DotNavigation` follows object properties.
+
+### Converter
+The Converter is the core of Type Shift. It provides a way to transform a Node of one type into a Node of another type. In the case of validation that may be transforming an unknown type into a known type or it may be transforming data in other ways in the case of a type adaptor. Beyond the methods related to converting values a converter provides the methods `pipe` and `default`. `pipe` is used to chain converters creating a new converter, `default` is used to specify an input in the case of a missing value.
