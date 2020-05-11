@@ -68,6 +68,7 @@ The Following converters are shipped with Type Shift
 - `strict(object or array of converters)` creates a converter that matches the structure of the input converters, omits values from the output that are not declared
 - `shape(object or array of converters, [other value converter])` creates a converter that matches the structure of the input converters, passes through any undeclared values after checking them against a converter
 - `union(selector, options)` creates a converter with a union of complex types, the selector is used to determine the option that is converted
+- `compose(converter array, combiner)` creates a converter by first converting a value with all the converters in the converter array, and then passing all values as an argument to the combiner.
 
 ### Path Converters
 The `path` tag function is used to evaluate a JSON path expression and convert it into a converter that projects a value, or values from another location in the input.

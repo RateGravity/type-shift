@@ -1,5 +1,6 @@
 export * from './nodes';
 export * from './format-value';
+export * from './composed';
 export * from './container';
 export * from './required';
 export * from './unknown';
