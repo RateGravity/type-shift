@@ -62,6 +62,50 @@ The Following converters are shipped with Type Shift
 - `literal(value)` successfully converts values equal to the given value using strict (===) equality
 - `oneOf(...values)` successfully converts values equal to one of the given values using strict (===) equality
 - `optional(converter)` marks a converter as optional, allowing missing values to flow around the given converter.
+- ``path`JSON PATH EXPRESSION` ``given a JSON path expression sources values from another part of the input.
+
+### Path Converters
+The `path` tag function is used to evaluate a JSON path expression and convert it into a converter that projects a value, or values from another location in the input.
+```ts
+import * as t from 'type-shift';
+
+// "$" represents the root of the input, so this path would pull a field called
+// "value" off of the root input.
+const valueField = t.path`$.value`;
+
+// a series of "^" paths represent the parent of the initial path, to get a sibling you
+// would go up to a parent, and then down into a field.
+const siblingField = t.path`^.value`;
+
+// "@" represents the current node allowing you do descend below the current node to
+// find values.
+const childField = t.path`@.value`;
+
+// Complex selectors like the deep selector, slice selector, star selector etc. all produce
+// an array of values 
+// The following path:
+// - starts at the root ("$")
+// - Selects elements 0, 3, and 5
+// - gets all the properties below those elements
+// - slices all but the last 2 positions
+// gets every property below that named value
+const crazyPath = t.path`$[0,3,5].*.[:-2]..value`;
+
+// Because we're using template literals we support using expression insertion
+// different value types are allowed in different situations.
+// - Slice selectors allow numbers for each position
+// - bracketed selectors allow arrays to specify multiple values
+// - bracketed selectors allow strings/numbers to specify specific keys
+// - other selectors will call toString any expressions to produce a value
+const insertedPath = t.path`$[${0}:${3}:${2}][1, 2, ${[3, 4]}].foo-${'bar'}`
+
+// Predicate Selectors are possible using a function expression
+// this predicate will match any elements beneath the root node with a value greater
+// than 5. Predicates are passed the value, key (either number or string), and the object
+// on which that value was found. They should return true to include the value, false
+// otherwise.
+const withPredicate = t.path`$[${(v) => v > 5}]`
+```
 
 ### Optional Converters
 Optional Converters are converters which may not return a value (represented as a missing node). While these are useful for building up objects with optional fields it can be useful to resolve these to present values. To do this use the `defaultIfMissing` method to specify an output if the result is missing, or the `required` property to get a converter that fails if the result is missing.

@@ -8,3 +8,4 @@ export * from './errors';
 export * from './converter-result';
 export * from './converter';
 export * from './optional';
+export * from './path';
