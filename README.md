@@ -65,8 +65,9 @@ The Following converters are shipped with Type Shift
 - ``path`JSON PATH EXPRESSION` ``given a JSON path expression sources values from another part of the input
 - `array(converter)` creates a converter that matches an array with values of the given converter
 - `record(converter)` creates a converter that matches an object with values of the given converter
-- `strict(object or array of converters)` creates a converter that matches the structure of the input converters, omits values from the output that are not declared.
-- `shape(object or array of converters, [other value converter])` creates a converter that matches the structure of the input converters, passes through any undeclared values after checking them against a converter.
+- `strict(object or array of converters)` creates a converter that matches the structure of the input converters, omits values from the output that are not declared
+- `shape(object or array of converters, [other value converter])` creates a converter that matches the structure of the input converters, passes through any undeclared values after checking them against a converter
+- `union(selector, options)` creates a converter with a union of complex types, the selector is used to determine the option that is converted
 
 ### Path Converters
 The `path` tag function is used to evaluate a JSON path expression and convert it into a converter that projects a value, or values from another location in the input.
@@ -158,6 +159,29 @@ import * as t from 'type-shift';
 
 // trys to match string, then null. Fail if both fail.
 const stringOrNull = t.string.or(t.null);
+```
+
+### Unions of Complex Types
+When dealing with more complex or transformed types you must tell Type Shift which candidate to try converting. To do this use the `union` function with a selector. We recommend using "tagged" unions if possible to make this a simple lookup based on a property.
+
+```ts
+import * as t from 'type-shift';
+
+// given a string it is used as a path to determine the branch
+// for instance this will match { type: "string", value: "five" }
+// or { type: "number", value: 5 }
+const stringOrNumberValue = t.union('type', {
+  string: t.strict({ value: t.string }),
+  number: t.strict({ value: t.number })
+});
+
+// more complex selectors are done via a converter function
+// for instance this will check for the presence of a key to determine
+// the type.
+const nameOrValue = t.union(v => 'value' in v ? 'value' : 'name', {
+  value: t.strict({ value: t.number }),
+  name: t.strict({ name: t.string })
+});
 ```
 
 ### Advanced

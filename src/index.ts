@@ -11,3 +11,4 @@ export * from './converter';
 export * from './object';
 export * from './optional';
 export * from './path';
+export * from './union';
