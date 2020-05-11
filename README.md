@@ -65,6 +65,8 @@ The Following converters are shipped with Type Shift
 - ``path`JSON PATH EXPRESSION` ``given a JSON path expression sources values from another part of the input
 - `array(converter)` creates a converter that matches an array with values of the given converter
 - `record(converter)` creates a converter that matches an object with values of the given converter
+- `strict(object or array of converters)` creates a converter that matches the structure of the input converters, omits values from the output that are not declared.
+- `shape(object or array of converters, [other value converter])` creates a converter that matches the structure of the input converters, passes through any undeclared values after checking them against a converter.
 
 ### Path Converters
 The `path` tag function is used to evaluate a JSON path expression and convert it into a converter that projects a value, or values from another location in the input.
@@ -111,6 +113,42 @@ const withPredicate = t.path`$[${(v) => v > 5}]`
 
 ### Optional Converters
 Optional Converters are converters which may not return a value (represented as a missing node). While these are useful for building up objects with optional fields it can be useful to resolve these to present values. To do this use the `defaultIfMissing` method to specify an output if the result is missing, or the `required` property to get a converter that fails if the result is missing.
+
+### Structural Converters (strict and shape)
+The Strict and Shape functions create converters that match objects that have the same structure as their inputs. These are the primary functions you'll use to define your schema. Strict only converts declared values while shape allows all values through but converts declared values. Generally Shape is useful if the value will be further checked downstream. Strict is more useful when you are going to be writing data to or reading from storage and you don't want stray values to be reflected in the output.
+
+```ts
+import * as t from 'type-shift';
+
+// Will match values with a name and optional value
+const valueHolder = t.strict({ name: t.string, value: t.optional(t.number) });
+
+// these can be used for tuples as well
+const valueHolderTuple = t.strict([t.string, t.optional(t.number)]);
+
+// shape allows other properties through.
+const nameOnly = t.shape({ name: t.string });
+
+// you can specify that all remaining properties must match a given converter.
+const nameWithNumbers = t.shape({ name: t.string }, t.number);
+
+// use never to assert the non-presence of a value
+// with strict undeclared keys will be ignored, declare a key as never
+// to ensure it is not passed.
+const noValue = t.strict({ name: t.string, value: t.never });
+// with shape specify that there should never be undeclared keys.
+const justName = t.shape({ name: t.string }, t.never);
+
+// you can mark a strict or shape as partial
+const partialValues = valueHolder.partial;
+// you can also access it's inner converters
+const nameConverter = valueHolder.converters.name;
+// this can be used to "extend" an object
+const valueWithFormat = t.strict({
+  ...valueHolder.converters,
+  format: t.optional(t.oneOf('percent', 'money'))
+});
+```
 
 ### Unions of Basic Types
 You'll often build off of basic types such as `string`, `number`, and `boolean`. It is often useful to express that you can accept 2 or more of these types. For this purpose the basic types support an `or` join to create a union type.
@@ -185,6 +223,9 @@ export class SetConverter<T> implements t.Converter<Set<T>, unknown> {
 ```
 
 ## Concepts
+
+### Type First
+Generally Typescript can do a pretty good job of inferring the resulting types out of a Type Converter. However when it can't we prefer a "Type First" approach in which you define the resulting type and then specify it on the converter. This is more verbose, but helps avoid very intense type mapping in our code which can result in mistakes in your code.
 
 ### Node
 Because Type Shift is about transforming data it is often useful to be able to pull data from other fields in an input. To enable this we represent the value passed to converters as a Node in a Tree. Nodes have a parent, value, and path. Converters can use the data in a Node to traverse the tree to find values. The path data encoded in the node is useful for ensuring that error messages are specific about what field is incorrect. Nodes represent either present or missing data, allowing them to encode the fact that a field that was requested on an input was not found, and allowing converters downstream to take appropriate action.

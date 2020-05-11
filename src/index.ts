@@ -8,5 +8,6 @@ export * from './basic-types';
 export * from './errors';
 export * from './converter-result';
 export * from './converter';
+export * from './object';
 export * from './optional';
 export * from './path';
