@@ -14,3 +14,74 @@ Type Shift is explicitly designed as single directional input validators / conve
 With Type Shift you define a converter that knows how to infer new schema fields from previous versions of the schema, these are then used to pull data into the new format so your application only needs to think about it's newest schema version. Type Shift can also be used as an adaptor to transform one schema into another, however for anything other than trivial cases it's often easier to define these transformations with code after type checking an input.
 
 Type Shift is intentionally focused on uni-directional conversions. This makes it easy to define a series of transformations without needing to define a way to "un-transform" data. Some use cases would benefit from being able to convert data from and to the same schema in which case Type Shift may not be the right tool.
+
+## Usage
+
+### Advanced
+#### Nodes
+You should generally never need to interact with the node class unless you're extending Converter.
+
+```ts
+import * as t from 'type-shift';
+
+export class SetConverter<T> implements t.Converter<Set<T>, unknown> {
+  public readonly name: string;
+  private readonly elementConverter: t.Converter<T, unknown>;
+
+  constructor(elementConverter: t.Converter<T, unknown>) {
+    super();
+    this.elementConverter = elementConverter;
+    this.name = `Set<${elementConverter.name}>`;
+  }
+
+  public tryConvertNode(node: t.Node<unknown>): t.ConverterResult<t.Node<Set<T>>> {
+    // nodes could be present or missing, check isMissingValue on the node or
+    // use the ifPresent method to get a value
+    return node.ifPresent(
+      p => {
+        // present nodes have a value
+        if (p.value instanceof Set) {
+          const results = Array.from(p.value.value()).map((v, i) => (
+            // nodes can create a child node with the current node as a parent.
+            // the first argument is either a Navigable Path element, string, or number.
+            this.elementConverter.tryConvertNode(p.child(i, v))
+          ));
+          if (results.every(({ success }) => success)) {
+            // setValue creates a new node with a new value but the same path and parent
+            return t.success(p.setValue(
+              new Set(results.filter(
+                // whenever you have a node you may be dealing with
+                // a missing node and need to handle that fact
+                ({ value }) => !value.isMissingValue
+              ).map(
+                ({ value }) => value.value
+              ));
+            ));
+          } else {
+            return t.failed(...results.filter(
+              ({ success }) => !success
+            ).flatMap(
+              ({ errors }) => errors
+            ));
+          }
+        }
+        return t.failed(
+          // converter errors should encode that path and value data from a node
+          new t.ConverterError(p.path, 'Set', p.value)
+        );
+      },
+      m => t.failed(
+        // If a node doesn't have a value just omit the argument in ConverterError
+        new t.ConverterError(m.path, 'Set')
+      )
+    )
+  }
+}
+```
+
+## Concepts
+
+### Node
+Because Type Shift is about transforming data it is often useful to be able to pull data from other fields in an input. To enable this we represent the value passed to converters as a Node in a Tree. Nodes have a parent, value, and path. Converters can use the data in a Node to traverse the tree to find values. The path data encoded in the node is useful for ensuring that error messages are specific about what field is incorrect. Nodes represent either present or missing data, allowing them to encode the fact that a field that was requested on an input was not found, and allowing converters downstream to take appropriate action.
+
+Nodes use **Navigation** to represent the part of the path they are at. Navigation is a way of encoding both the string representation of a path and how to get from one node to another. For instance the `RootNavigation` can walk up the tree of Nodes to reach the root, while the `DotNavigation` follows object properties.
