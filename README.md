@@ -54,6 +54,23 @@ export const valueObject = t.strict({ value: numberAsString.default('0') });
 The Following converters are shipped with Type Shift
 - `never` fails to convert any value except the missing value
 - `unknown` successfully converts any present value
+- `number` successfully converts values of type number
+- `string` successfully converts values of type string
+- `boolean` successfully converts values of type boolean
+- `null` successfully converts values equal to null
+- `undefined` successfully converts values equal to undefined
+- `literal(value)` successfully converts values equal to the given value using strict (===) equality
+- `oneOf(...values)` successfully converts values equal to one of the given values using strict (===) equality
+
+### Unions of Basic Types
+You'll often build off of basic types such as `string`, `number`, and `boolean`. It is often useful to express that you can accept 2 or more of these types. For this purpose the basic types support an `or` join to create a union type.
+
+```ts
+import * as t from 'type-shift';
+
+// trys to match string, then null. Fail if both fail.
+const stringOrNull = t.string.or(t.null);
+```
 
 ### Advanced
 #### Nodes
