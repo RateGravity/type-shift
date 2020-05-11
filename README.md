@@ -61,8 +61,10 @@ The Following converters are shipped with Type Shift
 - `undefined` successfully converts values equal to undefined
 - `literal(value)` successfully converts values equal to the given value using strict (===) equality
 - `oneOf(...values)` successfully converts values equal to one of the given values using strict (===) equality
-- `optional(converter)` marks a converter as optional, allowing missing values to flow around the given converter.
-- ``path`JSON PATH EXPRESSION` ``given a JSON path expression sources values from another part of the input.
+- `optional(converter)` marks a converter as optional, allowing missing values to flow around the given converter
+- ``path`JSON PATH EXPRESSION` ``given a JSON path expression sources values from another part of the input
+- `array(converter)` creates a converter that matches an array with values of the given converter
+- `record(converter)` creates a converter that matches an object with values of the given converter
 
 ### Path Converters
 The `path` tag function is used to evaluate a JSON path expression and convert it into a converter that projects a value, or values from another location in the input.
