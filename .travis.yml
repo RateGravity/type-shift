@@ -1,0 +1,20 @@
+language: node_js
+branches:
+  only:
+  - master
+  - "/^v\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/"
+script:
+- yarn type-check
+- yarn lint
+- yarn test
+- yarn build
+before_deploy: git describe --tags HEAD | xargs yarn version --no-git-tag-version
+  --new-version
+deploy:
+  provider: npm
+  email: dev+npmci@rategravity.com
+  skip_cleanup: true
+  on:
+    tags: true
+  api_key:
+    secure: BZgueIjerLknP5hAGggsXjIQLqdnuJMafi0+fJ5S/23MSnIIiNRNw+Ea6gIdc8laUU1P+3semIXxMZFDDckg1CA95oOVDgtn5vQTfqNmcGzp+izLw4bxwlxVS5+Mj/jAAIlPI+27ok+X0EHu6ONFfiZEtexuLxVRLMVr6J9oWf8hFPBqHzpbEiNNdqe5iFgOsjwESwRo8XgmR9vPCHV18gzWH4UQVm3IQRm5Z7ihdWNNG+vQoE1X1HeIOd66146by639NMPrDXmVCkGzwMdDQD8blpBwqTh7Sda+8WpNkxroUd8I4LygWsV9QNno3hC+srzqUqCDHrfu5iWvAAaVwGnF1dHei1pECw1fAdGJ77yA9yqsxQQfw84AzAhSotbSscOCsTOOs3JrxTnn2fTJlfg8JKR4e9V8Oi4t7D8Hrcy311xXhrjerqhPrMZMydwaysz77c7awidoUEip7suFL+TJQscLi5CvV2rg5DjLKLF77AsHvCyVoTNTD4cAT5CYxKS5k4miRV32xm857tWhryP/xerSwxmlNM08fYArD00ldtt2ugNKwKwkguPN1R+xZhLr1CKVA1zPFarym2M2QqiiahEEDiVOaWPKbpEWoq3di6B/Xqs/ndjtiFh+ciZnQDTrVzsoC502RrQlISTbzRWCMFdbZRi69mgutSJkpDQ=

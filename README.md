@@ -1,8 +1,11 @@
 # Type Shift
+[![Build Status](https://travis-ci.com/RateGravity/type-shift.svg?branch=master)](https://travis-ci.com/RateGravity/type-shift)
+
 Evolutionary Type Converters for input validation and transformation
 
 ## Installation
 `npm install --save type-shift`
+
 `yarn add type-shift`
 
 ## What is Type Shift
