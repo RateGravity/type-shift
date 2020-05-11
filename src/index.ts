@@ -7,3 +7,4 @@ export * from './basic-types';
 export * from './errors';
 export * from './converter-result';
 export * from './converter';
+export * from './optional';

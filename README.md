@@ -61,6 +61,10 @@ The Following converters are shipped with Type Shift
 - `undefined` successfully converts values equal to undefined
 - `literal(value)` successfully converts values equal to the given value using strict (===) equality
 - `oneOf(...values)` successfully converts values equal to one of the given values using strict (===) equality
+- `optional(converter)` marks a converter as optional, allowing missing values to flow around the given converter.
+
+### Optional Converters
+Optional Converters are converters which may not return a value (represented as a missing node). While these are useful for building up objects with optional fields it can be useful to resolve these to present values. To do this use the `defaultIfMissing` method to specify an output if the result is missing, or the `required` property to get a converter that fails if the result is missing.
 
 ### Unions of Basic Types
 You'll often build off of basic types such as `string`, `number`, and `boolean`. It is often useful to express that you can accept 2 or more of these types. For this purpose the basic types support an `or` join to create a union type.
