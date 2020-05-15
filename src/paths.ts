@@ -4,10 +4,10 @@ import { ConverterError } from './errors';
 import { formatPath } from './formatting';
 
 export const CurrentPath = Symbol('.');
-type CurrentPath = typeof CurrentPath;
 
 export const ParentPath = Symbol('..');
-type ParentPath = typeof ParentPath;
+
+export type TargetPathPart = string | number | typeof CurrentPath | typeof ParentPath;
 
 /**
  * Resolves `targetPath` on `entity. Able to support both relative and absolute paths.
@@ -18,7 +18,7 @@ type ParentPath = typeof ParentPath;
  */
 const followPath = (
   entity: unknown,
-  targetPath: (string | number | CurrentPath | ParentPath)[],
+  targetPath: TargetPathPart[],
   currentPath: (string | number)[]
 ): [unknown, (string | number)[]] => {
   if (targetPath.length > 0) {
@@ -58,9 +58,7 @@ const followPath = (
  * This is especially useful for migrating data from old schemas
  * @param targetPath -the path to pull data from
  */
-export function forPath(
-  targetPath: (string | number | CurrentPath | ParentPath)[]
-): Converter<unknown, unknown>;
+export function forPath(targetPath: TargetPathPart[]): Converter<unknown, unknown>;
 
 /**
  * Given a Path and a converter, invoke the converter at the given path
@@ -71,12 +69,12 @@ export function forPath(
  * @param converter - the converter to process the data with
  */
 export function forPath<Result>(
-  targetPath: (string | number | CurrentPath | ParentPath)[],
+  targetPath: TargetPathPart[],
   converter: ConverterFunction<Result, unknown>
 ): Converter<Result, unknown>;
 
 export function forPath(
-  targetPath: (string | number | CurrentPath | ParentPath)[],
+  targetPath: TargetPathPart[],
   converter: ConverterFunction<unknown, unknown> = UnknownConverter
 ): Converter<unknown, unknown> {
   return createConverter((_, entityPath, entity) => {

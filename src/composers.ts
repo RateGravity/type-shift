@@ -1,6 +1,6 @@
 import { Converter, ConverterFunction, createConverter, getConverterName } from './core';
 
-type Converters<T> = { [K in keyof T]: ConverterFunction<T[K]> };
+export type ComposedConverters<T> = { [K in keyof T]: ConverterFunction<T[K]> };
 
 /**
  * Combine an arbitrary number of converters and pass their resulting
@@ -11,7 +11,7 @@ type Converters<T> = { [K in keyof T]: ConverterFunction<T[K]> };
  *   converter functions.
  */
 export const compose = <C extends (...args: any) => any>(
-  converters: Converters<Parameters<C>>,
+  converters: ComposedConverters<Parameters<C>>,
   combiner: C
 ): Converter<ReturnType<C>> => {
   return createConverter((value, path, entity) => {
