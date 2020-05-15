@@ -68,7 +68,7 @@ const NeverConverter = createConverter((value: unknown, path) => {
 
 /**
  * Given a value create a converter that must match the literal value
- * @param value the literal value to compare to, uses === identity equality
+ * @param value - the literal value to compare to, uses === identity equality
  */
 export function literal<V extends string | number | boolean | null | undefined>(
   value: V

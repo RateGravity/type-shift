@@ -20,8 +20,8 @@ export function oneOf<V extends string | number | boolean | undefined | null>(
 
 /**
  * A union type for tagged unions
- * @param tag the branch selector selects which union branch to use
- * @param options the union branches
+ * @param tag - the branch selector selects which union branch to use
+ * @param options - the union branches
  */
 export function taggedUnion<R extends object, Input = unknown>(
   tag: keyof R,
@@ -46,7 +46,7 @@ export function taggedUnion<R extends object, Input = unknown>(
  * Flattens a converter function that returns a converter function into
  *   just a converter function.
  *
- * @param converter Converter function to flatten.
+ * @param converter - Converter function to flatten.
  */
 export const select = <TOutput, TInput = unknown>(
   converter: ConverterFunction<ConverterFunction<TOutput, TInput>, TInput>

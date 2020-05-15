@@ -6,9 +6,9 @@ import { ConverterError } from './errors';
 export interface ConverterFunction<Result, Input = unknown> {
   readonly displayName?: string;
   /**
-   * @argument input The Input value to convert
-   * @argument path The path to the input value from the root entity
-   * @argument entity The root entity that is being converted
+   * @param input - The Input value to convert
+   * @param path - The path to the input value from the root entity
+   * @param entity - The root entity that is being converted
    */
   (input: Input, path: (string | number)[], entity: unknown): Result;
 }
@@ -22,23 +22,23 @@ export interface Converter<Result, Input = unknown> extends ConverterFunction<Re
    */
   readonly displayName: string;
   /**
-   * @argument input The Input value to convert
-   * @argument path The path to the input value from the root entity, defaults to []
-   * @argument entity The root entity, defaults to input
+   * @param input - The Input value to convert
+   * @param path - The path to the input value from the root entity, defaults to []
+   * @param entity - The root entity, defaults to input
    */
   (input: Input, path?: (string | number)[], entity?: unknown): Result;
 
   /**
    * pipes the output of this converter to another converter
-   * @param nextConverter the next converter to call
-   * @param name the name of the resulting converter
+   * @param nextConverter - the next converter to call
+   * @param name - the name of the resulting converter
    */
   pipe<Next>(nextConverter: ConverterFunction<Next, Result>, name?: string): Converter<Next, Input>;
 
   /**
    * if this conversion would throw an error
    * try the other conversion
-   * @param otherConverter the other conversion to try
+   * @param otherConverter - the other conversion to try
    */
   or<Other>(otherConverter: ConverterFunction<Other, Input>): Converter<Result | Other, Input>;
 
@@ -47,7 +47,7 @@ export interface Converter<Result, Input = unknown> extends ConverterFunction<Re
    * The given converter is invoked if the input value is undefined
    * otherwise this converter is invoked. The result of the
    * given converter is passed through this converter as well.
-   * @param defaultConverter the converter to select a default value
+   * @param defaultConverter - the converter to select a default value
    * @returns a new converter that when given an undefined input tries
    * to supply a default value to this converter.
    */
@@ -58,7 +58,7 @@ export interface Converter<Result, Input = unknown> extends ConverterFunction<Re
 
 /**
  * Given a converter function get the name of the converter
- * @param converter the converter function
+ * @param converter - the converter function
  */
 export function getConverterName(converter: ConverterFunction<any, any>): string {
   return converter.displayName || converter.name || 'anonymous';
@@ -73,8 +73,8 @@ export type TypeOf<
 
 /**
  * Given a converter function and optional name create a converter
- * @param converter the converter function to use to convert the values
- * @param name the name, if not specified uses the display name or name property of the converter
+ * @param converter - the converter function to use to convert the values
+ * @param name - the name, if not specified uses the display name or name property of the converter
  */
 export function createConverter<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>,

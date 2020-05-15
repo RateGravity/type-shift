@@ -12,9 +12,9 @@ type ParentPath = typeof ParentPath;
 /**
  * Resolves `targetPath` on `entity. Able to support both relative and absolute paths.
  *
- * @param entity Entity to traverse.
- * @param targetPath Targeted path to resolve.
- * @param currentPath Path of the current converter.
+ * @param entity - Entity to traverse.
+ * @param targetPath - Targeted path to resolve.
+ * @param currentPath - Path of the current converter.
  */
 const followPath = (
   entity: unknown,
@@ -56,7 +56,7 @@ const followPath = (
  * from the root entity.
  *
  * This is especially useful for migrating data from old schemas
- * @param targetPath the path to pull data from
+ * @param targetPath -the path to pull data from
  */
 export function forPath(
   targetPath: (string | number | CurrentPath | ParentPath)[]
@@ -67,8 +67,8 @@ export function forPath(
  * from the root entity.
  *
  * This is especially useful for migrating data from old schemas
- * @param targetPath the path to pull data from
- * @param converter the converter to process the data with
+ * @param targetPath - the path to pull data from
+ * @param converter - the converter to process the data with
  */
 export function forPath<Result>(
   targetPath: (string | number | CurrentPath | ParentPath)[],
@@ -90,7 +90,7 @@ export function forPath(
  * This effectively causes functions like forPath to
  * be unable to traverse above the current point in the tree. It's useful as a way
  * to re-use converters when you have nested data.
- * @param converter the converter to process data with
+ * @param converter - the converter to process data with
  */
 export function sub<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>

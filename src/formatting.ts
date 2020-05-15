@@ -1,6 +1,6 @@
 /**
  * Given a path array return a path string
- * @param path the path array comprising of string and number parts
+ * @param path - the path array comprising of string and number parts
  */
 export function formatPath(path: (string | number)[]): string {
   return path
@@ -10,7 +10,7 @@ export function formatPath(path: (string | number)[]): string {
 
 /**
  * Determine the printed string for a value
- * @param value a value to print
+ * @param value - a value to print
  */
 export function displayValue(value: unknown): string {
   if (value === null) {

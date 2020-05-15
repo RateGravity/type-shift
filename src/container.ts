@@ -2,8 +2,8 @@ import { Converter, ConverterFunction, createConverter, getConverterName } from 
 import { ConverterError } from './errors';
 
 /**
- * A Record<string,T> converter
- * @param converter the converter to use for the values in the record
+ * A Record\<string,T\> converter
+ * @param converter - the converter to use for the values in the record
  */
 export function record<T>(
   converter: ConverterFunction<T, unknown>
@@ -49,8 +49,8 @@ export function record<T>(
 }
 
 /**
- * A Array<T> converter
- * @param converter the converter to use for values of the array.
+ * A Array\<T\> converter
+ * @param converter - the converter to use for values of the array.
  */
 export function array<T>(converter: ConverterFunction<T, unknown>): Converter<T[], unknown> {
   const name = `Array<${getConverterName(converter)}>`;

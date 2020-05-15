@@ -14,7 +14,7 @@ export interface ShapeConverter<S extends object> extends Converter<S, unknown> 
 
 /**
  * A strict converter where properties not explicitly specified will not be returned
- * @param converters an object structure describing the resulting value
+ * @param converters - an object structure describing the resulting value
  */
 export function strict<S extends object>(
   converters: { [K in keyof S]: ConverterFunction<S[K], unknown> }
@@ -82,7 +82,7 @@ export function strict<S extends object>(
  * Generally shape should be used if the value is going to be "re-serialized" as-is
  * This is useful for things like application stacks which may want to verify a subset of
  * properties but leave most validation up to the domain stack
- * @param converters an object structure describing the resulting value
+ * @param converters - an object structure describing the resulting value
  */
 export function shape<S extends object>(
   converters: { [K in keyof S]: ConverterFunction<S[K], unknown> }
@@ -123,7 +123,7 @@ export function shape<S extends object>(
  *
  * If the given shape converter was created with the t.strict creator
  * the resulting partial will also be strict
- * @param converter the shape converter to make partial
+ * @param converter - the shape converter to make partial
  */
 export function partial<S extends object>(
   converter: ShapeConverter<S>
