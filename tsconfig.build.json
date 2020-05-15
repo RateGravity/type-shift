@@ -3,8 +3,9 @@
   "compilerOptions": {
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "outDir": "./lib",
-    "declaration": true
+    "outDir": "./build",
+    "declaration": true,
+    "declarationMap": true
   },
   "exclude": ["**/__*__/**/*.ts"]
 }
