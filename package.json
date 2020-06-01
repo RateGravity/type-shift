@@ -14,8 +14,8 @@
     "postbuild": "yarn postbuild:test && yarn postbuild:typecheck",
     "build:clean": "rm -rf ./lib ./build",
     "build:rollup": "rollup --config rollup.config.js",
-    "build:typedef": "tsc --build ./tsconfig.build.json && api-extractor run",
-    "build": "yarn build:clean && yarn build:rollup && yarn build:typedef",
+    "build:typedef": "tsc --build ./tsconfig.build.json",
+    "build": "yarn build:clean && yarn build:typedef && yarn build:rollup",
     "prebuild": "yarn prebuild:typecheck && yarn prebuild:lint && yarn prebuild:test",
     "prebuild:lint": "eslint src --ext js,ts,tsx,jsx,json",
     "prebuild:typecheck": "tsc",
@@ -50,6 +50,7 @@
     "pre-commit": "^1.2.2",
     "prettier": "^2.0.5",
     "rollup": "^2.7.2",
+    "rollup-plugin-dts": "^1.4.7",
     "typescript": "^3.8.3"
   },
   "pre-commit": [
