@@ -9,10 +9,13 @@
   "typings": "lib/index.d.ts",
   "author": "Own Up <type-shift@ownup.com>",
   "scripts": {
+    "postbuild:test": "jest --config ./jest-postbuild.config.js",
+    "postbuild:typecheck": "tsc --noEmit ./lib/index.d.ts",
+    "postbuild": "yarn postbuild:test && yarn postbuild:typecheck",
     "build:clean": "rm -rf ./lib ./build",
     "build:rollup": "rollup --config rollup.config.js",
-    "build:typedef": "tsc --build ./tsconfig.build.json && api-extractor run",
-    "build": "yarn build:clean && yarn build:rollup && yarn build:typedef",
+    "build:typedef": "tsc --build ./tsconfig.build.json",
+    "build": "yarn build:clean && yarn build:typedef && yarn build:rollup",
     "prebuild": "yarn prebuild:typecheck && yarn prebuild:lint && yarn prebuild:test",
     "prebuild:lint": "eslint src --ext js,ts,tsx,jsx,json",
     "prebuild:typecheck": "tsc",
@@ -29,7 +32,6 @@
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-typescript": "^7.9.0",
-    "@microsoft/api-extractor": "^7.8.0",
     "@rollup/plugin-babel": "^5.0.0",
     "@rollup/plugin-node-resolve": "^7.1.3",
     "@types/jest": "^25.2.1",
@@ -47,6 +49,7 @@
     "pre-commit": "^1.2.2",
     "prettier": "^2.0.5",
     "rollup": "^2.7.2",
+    "rollup-plugin-dts": "^1.4.7",
     "typescript": "^3.8.3"
   },
   "pre-commit": [
