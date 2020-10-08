@@ -1,4 +1,4 @@
-import { createConverter } from 'type-shift';
+import { createConverter, ConverterError } from 'type-shift';
 
 describe('createConverter', () => {
   it('creates converter with name of function', () => {
@@ -79,6 +79,72 @@ describe('createConverter', () => {
     });
     const converter = createConverter(one).or(two);
     expect(() => converter(0)).toThrow();
+  });
+  it('or throws error with more errors', () => {
+    const less = new ConverterError('test', 'not-test', ['field', 0]);
+    const more = new ConverterError('test', 'not-test', ['field', 0]);
+    more.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    const converter = createConverter(() => {
+      throw less;
+    }).or(() => {
+      throw more;
+    });
+    expect(() => converter(0)).toThrow(more);
+  });
+  it('or thows error with deeper errors', () => {
+    const shallow = new ConverterError('test', 'not-test', ['field', 0]);
+    const deep = new ConverterError('test', 'not-test', ['field', 0, 'other']);
+    const converter = createConverter(() => {
+      throw shallow;
+    }).or(() => {
+      throw deep;
+    });
+    expect(() => converter(0)).toThrow(deep);
+  });
+  it('or prefers deeper errors over more errors', () => {
+    const moreShallow = new ConverterError('test', 'not-test', ['field', 0]);
+    moreShallow.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    const lessDeep = new ConverterError('test', 'not-test', ['field', 0, 'other']);
+    const converter = createConverter(() => {
+      throw moreShallow;
+    }).or(() => {
+      throw lessDeep;
+    });
+    expect(() => converter(0)).toThrow(lessDeep);
+  });
+  it('or uses count of errors at max depth', () => {
+    const twoDeepest = new ConverterError('test', 'not-test', ['field']);
+    twoDeepest.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
+    twoDeepest.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    const oneDeepest = new ConverterError('test', 'not-test', ['field']);
+    oneDeepest.errorFields['$.other'] = { expected: 'test', actual: 'not-test' };
+    oneDeepest.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
+    const converter = createConverter(() => {
+      throw twoDeepest;
+    }).or(() => {
+      throw oneDeepest;
+    });
+    expect(() => converter(0)).toThrow(twoDeepest);
+  });
+  it('or throws new errors if the errors tie depth and count', () => {
+    const errorOne = new ConverterError('test', 'not-test', ['field']);
+    errorOne.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
+    errorOne.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    const errorTwo = new ConverterError('test', 'not-test', ['other']);
+    errorTwo.errorFields['$.other[0]'] = { expected: 'test', actual: 'not-test' };
+    errorTwo.errorFields['$.other[1]'] = { expected: 'test', actual: 'not-test' };
+    const converter = createConverter(() => {
+      throw errorOne;
+    }).or(() => {
+      throw errorTwo;
+    });
+    expect.assertions(2);
+    try {
+      converter(0);
+    } catch (err) {
+      expect(err).not.toBe(errorOne);
+      expect(err).not.toBe(errorTwo);
+    }
   });
   it(`default falls back on undefined`, () => {
     const one = createConverter((v) => v);
