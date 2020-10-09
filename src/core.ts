@@ -1,5 +1,31 @@
 import { ConverterError } from './errors';
 
+// count the number of dots or open brackets
+// this avoids complex path parsing while getting a "good enough" hueristic
+function guessPathLength(formattedPath: string): number {
+  return Array.from(formattedPath)
+    .map((v) => (v === '.' || v === '[' ? 1 : 0))
+    .reduce((l: number, r: number): number => l + r, 0);
+}
+
+// find the count of errors at the max depth.
+function maxDepthCount(error: ConverterError): { depth: number; count: number } {
+  return Object.keys(error.errorFields)
+    .map(guessPathLength)
+    .reduce(
+      (max: { depth: number; count: number }, d) => {
+        if (d === max.depth) {
+          max.count += 1;
+        } else if (d > max.depth) {
+          max.depth = d;
+          max.count = 1;
+        }
+        return max;
+      },
+      { depth: 0, count: 0 }
+    );
+}
+
 /**
  * A Converter Function
  */
@@ -114,6 +140,24 @@ export function createConverter<Result, Input = unknown>(
               try {
                 return otherConverter(input, path, entity);
               } catch (other) {
+                if (err instanceof ConverterError && other instanceof ConverterError) {
+                  // heuristic to figure out which is the more likely branch
+                  const errStat = maxDepthCount(err);
+                  const otherStat = maxDepthCount(other);
+                  // if one is able to find errors deeper in the tree it's more likely
+                  if (errStat.depth > otherStat.depth) {
+                    throw err;
+                  } else if (otherStat.depth > errStat.depth) {
+                    throw other;
+                    // the one with the most deepest errors is more likely
+                  } else if (errStat.count > otherStat.count) {
+                    throw err;
+                  } else if (otherStat.count > errStat.count) {
+                    throw err;
+                  }
+                  // if both have the same number of errors at the same level create a joined up error:
+                  // example t.string.or(t.boolean) should be "expected string | boolean but was ..."
+                }
                 // throw a joined up error
                 throw new ConverterError(input, joinedName, path);
               }
