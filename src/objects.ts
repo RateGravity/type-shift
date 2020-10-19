@@ -150,3 +150,37 @@ export function partial<S extends object>(
     );
   }
 }
+
+/**
+ * Given a shape converter removes all fields not explicitly
+ *   declared in the input from the output.
+ *
+ * This is useful for when you have fields that can be undefined
+ *   but want to distinguish your undefined fields from the
+ *   undeclared fields, such as when you're spreading an
+ *   object onto another one as an update operation.
+ *
+ * Will only remove an undeclared field if the converter
+ *   resulted in it being undefined. It will respect all
+ *   other converter operations such as defaulting and
+ *   will still throw an error if the field was not
+ *   able to be undefined (aka 'optional')
+ *
+ * @param converter - the shape converter to use
+ */
+export function ignoreUndeclared<S extends object>(converter: ShapeConverter<S>): Converter<S> {
+  return createConverter((input: unknown) => {
+    const output = converter(input) as Record<string, unknown>;
+    // If the converter passed, we assume the input was properly formed.
+    return Object.keys(output).reduce((acc, key) => {
+      const outputValue = output[key];
+      if (outputValue === undefined) {
+        if (!(key in (input as Record<string, unknown>))) {
+          return acc;
+        }
+      }
+      acc[key] = outputValue;
+      return acc;
+    }, {} as Record<string, unknown>) as S;
+  }, `${converter.name}-IgnoreUndeclared`);
+}

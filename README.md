@@ -58,6 +58,7 @@ These converters match their elements against a given converter.
 - `strict(<{ [key]: converter function }>)` - Given an object of keys to converters creates a converter that matches input keys with the declared converters and returns the resulting object. Only declared keys are returned.
 - `shape(<{ [key]: converter function }>)` - Same as strict but any keys present on the input that are not declared are also returned.
 - `partial(<strict or shape>)` - Given either a strict or shape converter makes every field optional, maintains strictness.
+- `ignoreUndeclared(<strict or shape>)` - Given either a strict or shape converter, will ignore any undefined fields not on the original object
 - `optional(<converter function>)` - Create a converter function that passes undefined input around the inner converter, useful for marking optional fields in objects.
 
 ### Paths
