@@ -7,4 +7,4 @@ import { ConverterFunction } from './core';
  */
 export const convert = <Result, Input>(converter: ConverterFunction<Result, Input>) => (
   input: Input
-) => converter(input, [], input);
+): Result => converter(input, [], input);
