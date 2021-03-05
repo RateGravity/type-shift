@@ -29,8 +29,7 @@
       "error",
       {
         "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "ignoreRestArgs": true
+        "varsIgnorePattern": "^_"
       }
     ],
     "import/no-default-export": "error",
