@@ -15,7 +15,9 @@
   },
   "plugins": ["@typescript-eslint", "import", "prettier"],
   "rules": {
-    // Override recommended rule -- explicit return types are unecessary
+    // Override recommended rule -- allow object as a type
+    "@typescript-eslint/ban-types": "off",
+    // Override recommended rule -- explicit return types are unnecessary
     "@typescript-eslint/explicit-function-return-type": "off",
     // Override recommended rule -- we are not ready to commit to this
     "@typescript-eslint/no-explicit-any": "off",
@@ -29,8 +31,7 @@
       "error",
       {
         "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "ignoreRestArgs": true
+        "varsIgnorePattern": "^_"
       }
     ],
     "import/no-default-export": "error",
