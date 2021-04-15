@@ -23,7 +23,7 @@ A Converter is a function with the following signature:
 ```ts
 <Result, Input>(input: Input, path: Array<string | number>, entity: unknown) => Result;
 ```
-- `input` The value from the input that should be validated or converter. Most converters take an Input of `unknown`.
+- `input` The value from the input that should be validated or converted. Most converters take an Input of `unknown`.
 - `path` An array of string and number segments that made up the path to get to this point. Useful for error reporting and relative path traversal.
 - `entity` The root entity that the conversion was started on. Useful for inferring new property values from old properties.
 
