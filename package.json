@@ -1,5 +1,5 @@
 {
-  "name": "type-shift",
+  "name": "@rategravity/type-shift",
   "version": "0.0.1",
   "description": "Evolutionary Type Converters and Input Validators",
   "repository": "https://github.com/RateGravity/type-shift.git",
@@ -54,5 +54,6 @@
   },
   "pre-commit": [
     "lint"
-  ]
+  ],
+  "private": true
 }
