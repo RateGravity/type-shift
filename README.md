@@ -48,6 +48,7 @@ These convert the basic types with some coercion.
 - `null` - allows null
 - `undefined` - allows undefined
 - `literal(<value>)` - create a new converter that expects a value === to the given value.
+- `none` - allows null or undefined
 
 ### Containers
 These converters match their elements against a given converter.
@@ -59,6 +60,9 @@ These converters match their elements against a given converter.
 - `shape(<{ [key]: converter function }>)` - Same as strict but any keys present on the input that are not declared are also returned.
 - `partial(<strict or shape>)` - Given either a strict or shape converter makes every field optional, maintains strictness.
 - `optional(<converter function>)` - Create a converter function that passes undefined input around the inner converter, useful for marking optional fields in objects.
+- `noneable(<converter function>)` - Create a converter function that passes undefined or null input around the inner converter, useful for marking optional fields in objects.
+- `noneableAsNull(<converter function>)` - Create a converter function that coerces undefined or null input to null around the inner converter, useful for marking optional fields in objects.
+- `noneableAsNull(<converter function>)` - Create a converter function that coerces undefined or null input to undefined around the inner converter, useful for marking optional fields in objects.
 
 ### Paths
 - `forPath(<path array>, ?<converter function>)` - Navigates to the given path (either relative or from root),returning the value that is there. Optionally apply a converter function to the value before it is returned.
@@ -68,6 +72,11 @@ These converters match their elements against a given converter.
 - `oneOf(<option[]>)` - Given an array of option values returns the value if it === the input value.
 -  `taggedUnion(<tagField>, <{ [tag]: converter function }>)` - Pulls the value of the property specified by the tag field off of the input and uses it to find the correct converter function. Tagged unions should be used instead of the `.or` combination for complex objects as we can report on errors better.
 - `select(<converter function>)` - Given a converter function that takes a value and returns a converter function create a converter that runs the returned converter function. Useful for when runtime inspection of values beyond a tagged union is needed.
+
+### Coercers
+- `coerce(<converter function[]>, value)` - given an array of converters if one succeeds at converting the input return the given value.
+- `noneAsNull` - coerces `none` values to `null`
+- `noneAsUndefined` - coerces `none` values to `undefined`
 
 ### Other
 - `compose(<converter function[]>, <combiner>)` - given one or more converters apply them and pass all the results to a combiner function that determines the result of the converter.

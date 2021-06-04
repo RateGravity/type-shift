@@ -96,11 +96,34 @@ const NullConverter = literal<null>(null);
  */
 const UndefinedConverter = literal<undefined>(undefined);
 
+/**
+ * A type representing undefined or null
+ */
+export type None = null | undefined;
+
+/**
+ * Converter that matches the literal undefined or null,
+ * You can make values optionally none by using
+ * t.none.or(...)
+ */
+const NoneConverter = createConverter((value: unknown, path) => {
+  if (value === null) {
+    return null;
+  }
+
+  if (value === undefined) {
+    return undefined;
+  }
+
+  throw new ConverterError(value, 'none', path);
+}, 'none');
+
 export {
   NumberConverter as number,
   StringConverter as string,
   BooleanConverter as boolean,
   UnknownConverter as unknown,
+  NoneConverter as none,
   NeverConverter as never,
   NullConverter as null,
   UndefinedConverter as undefined

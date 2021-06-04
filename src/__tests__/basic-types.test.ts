@@ -74,7 +74,7 @@ describe('primitive types', () => {
         });
       });
 
-      it('converts empty strings', () => {
+      it('converts none strings', () => {
         expect(t.string('')).toBe('');
       });
     });
@@ -116,7 +116,7 @@ describe('primitive types', () => {
     });
 
     describe('from object', () => {
-      it('fails on empty object', () => {
+      it('fails on none object', () => {
         expect(() => t.string({})).toThrowError();
       });
 
@@ -126,7 +126,7 @@ describe('primitive types', () => {
     });
 
     describe('from array', () => {
-      it('fails on empty array', () => {
+      it('fails on none array', () => {
         expect(() => t.string([])).toThrowError();
       });
 
@@ -153,5 +153,15 @@ describe('primitive types', () => {
         expect(() => t.string(() => 'hey')).toThrowError();
       });
     });
+  });
+
+  it('Empty passes null values', () => {
+    expect(t.none(null, [], {})).toBe(null);
+  });
+  it('Empty passes undefind values', () => {
+    expect(t.none(undefined, [], {})).toBe(undefined);
+  });
+  it('Empty throws on non-null / non-undefined values', () => {
+    expect(() => t.none(false, [], {})).toThrow();
   });
 });
