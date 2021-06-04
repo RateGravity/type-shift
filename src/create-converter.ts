@@ -107,7 +107,8 @@ export function createConverter<Result, Input = unknown>(
           return createConverter(
             (input, path, entity) =>
               createdNextConverter(createdConverter(input, path, entity), path, entity),
-            displayName
+            displayName,
+            () => createdConverter.optional.pipe(createdNextConverter.optional, `optional ${displayName}`)
           );
         },
         writable: false,
@@ -119,7 +120,7 @@ export function createConverter<Result, Input = unknown>(
         ): Converter<Result | Other, Input> {
           const createdOtherConverter = createConverter(otherConverter);
           const joinedName = `${createdConverter.displayName} | ${createdOtherConverter.displayName}`;
-          return createConverter((input, path, entity) => {
+          return createConverter<Result | Other, Input>((input, path, entity) => {
             try {
               return createdConverter(input, path, entity);
             } catch (err) {
@@ -148,7 +149,7 @@ export function createConverter<Result, Input = unknown>(
                 throw new ConverterError(input, joinedName, path);
               }
             }
-          }, joinedName);
+          }, joinedName, () => createdConverter.optional.or(createdOtherConverter.optional));
         },
         writable: false,
         enumerable: true
@@ -157,14 +158,25 @@ export function createConverter<Result, Input = unknown>(
         value(
           defaultConverter: ConverterFunction<Input, undefined>
         ): Converter<Result, Input | undefined> {
-          const createdDefaultConverter = createConverter(defaultConverter);
+          const createdDefaultConverter: Converter<Input, undefined> = createConverter<
+            Input,
+            undefined
+          >(
+            defaultConverter,
+            undefined,
+            'optional' in defaultConverter ? undefined : () => createdDefaultConverter
+          );
           const defaultedName = `${createdConverter.displayName} with default`;
-          return createConverter((input: Input | undefined, path, entity) => {
-            if (input === undefined) {
-              input = createdDefaultConverter(undefined, path, entity);
-            }
-            return createdConverter(input as Input, path, entity);
-          }, defaultedName);
+          return createConverter<Result, Input | undefined>(
+            (input: Input | undefined, path, entity) => {
+              if (input === undefined) {
+                input = createdDefaultConverter(undefined, path, entity);
+              }
+              return createdConverter(input as Input, path, entity);
+            },
+            defaultedName,
+            () => createdConverter.optional.default(createdDefaultConverter.optional)
+          );
         },
         writable: false,
         enumerable: true
