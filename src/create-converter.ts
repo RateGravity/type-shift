@@ -51,6 +51,7 @@ export function createConverter<Result, Input = unknown>(
     return converter;
   }
   name = name === undefined ? getConverterName(converter) : name;
+  let optionalCache: Converter<Result | undefined, Input | undefined> | null = null;
   const createdConverter: Converter<Result, Input> = Object.defineProperties(
     (input: Input, path: (string | number)[] = [], entity: unknown = input) =>
       converter(input, path, entity),
@@ -58,6 +59,20 @@ export function createConverter<Result, Input = unknown>(
       displayName: {
         value: name,
         writable: false,
+        enumerable: true
+      },
+      optional: {
+        get(): Converter<Result | undefined, Input | undefined> {
+          if (optionalCache === null) {
+            optionalCache = createConverter((input, path, entity) => {
+              if (input === undefined) {
+                return undefined;
+              }
+              return createdConverter(input, path, entity);
+            }, `optional ${createdConverter.displayName}`);
+          }
+          return optionalCache!
+        },
         enumerable: true
       },
       pipe: {

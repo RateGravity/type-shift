@@ -1,4 +1,4 @@
-import { Converter, ConverterFunction, getConverterName } from './core';
+import { Converter, ConverterFunction } from './core';
 import { createConverter } from './create-converter';
 
 /**
@@ -9,10 +9,5 @@ import { createConverter } from './create-converter';
 export function optional<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
 ): Converter<Result | undefined, Input | undefined> {
-  return createConverter((input, path, entity) => {
-    if (input === undefined) {
-      return undefined;
-    }
-    return converter(input, path, entity);
-  }, `optional ${getConverterName(converter)}`);
+  return createConverter(converter).optional;
 }

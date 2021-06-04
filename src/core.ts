@@ -19,6 +19,12 @@ export interface Converter<Result, Input = unknown> extends ConverterFunction<Re
    * The Name of the converter
    */
   readonly displayName: string;
+
+  /**
+   * An optional version of this converter that allow undefined values for input and output.
+   */
+  readonly optional: Converter<Result | undefined, Input | undefined>;
+
   /**
    * @param input - The Input value to convert
    * @param path - The path to the input value from the root entity, defaults to []

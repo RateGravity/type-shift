@@ -194,4 +194,14 @@ describe('createConverter', () => {
     }
     expect(d).not.toHaveBeenCalled();
   });
+  describe('optional', () => {
+    it('allows and returns undefined', () => {
+      const converter = createConverter(() => 1).optional;
+      expect(converter(undefined)).toBe(undefined);
+    });
+    it('passes not-undefined values into converter', () => {
+      const converter = createConverter(() => 1).optional;
+      expect(converter(2)).toBe(1);
+    });
+  });
 });
