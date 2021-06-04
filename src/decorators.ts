@@ -1,4 +1,5 @@
-import { Converter, ConverterFunction, createConverter, getConverterName } from './core';
+import { Converter, ConverterFunction, getConverterName } from './core';
+import { createConverter } from './create-converter';
 
 /**
  * Given a converter function make an optional converter function

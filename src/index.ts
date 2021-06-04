@@ -2,6 +2,7 @@ export * from './basic-types';
 export * from './container';
 export * from './composers';
 export * from './core';
+export * from './create-converter';
 export * from './decorators';
 export * from './errors';
 export * from './formatting';
