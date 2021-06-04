@@ -23,6 +23,11 @@ describe('createConverter', () => {
     const converter = createConverter(one, 'three');
     expect(converter).toHaveProperty('displayName', 'three');
   });
+  it("if given just a converter returns it", () => {
+    const converter = createConverter(() => 1);
+    const doubleCreated = createConverter(converter);
+    expect(doubleCreated).toBe(converter);
+  });
   it('creates a converter that passes through default path and entity', () => {
     const inner = jest.fn(() => 1);
     const converter = createConverter(inner);

@@ -27,16 +27,31 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
     );
 }
 
+function isConverter<Result, Input>(
+  converterFunction: ConverterFunction<Result, Input>
+): converterFunction is Converter<Result, Input> {
+  return (
+    'displayName' in converterFunction &&
+    'pipe' in converterFunction &&
+    'or' in converterFunction &&
+    'default' in converterFunction
+  );
+}
+
 /**
  * Given a converter function and optional name create a converter
  * @param converter - the converter function to use to convert the values
  * @param name - the name, if not specified uses the display name or name property of the converter
  */
- export function createConverter<Result, Input = unknown>(
+export function createConverter<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>,
-  name: string = getConverterName(converter)
+  name?: string
 ): Converter<Result, Input> {
-  return Object.defineProperties(
+  if (isConverter(converter) && name === undefined) {
+    return converter;
+  }
+  name = name === undefined ? getConverterName(converter) : name;
+  const createdConverter: Converter<Result, Input> = Object.defineProperties(
     (input: Input, path: (string | number)[] = [], entity: unknown = input) =>
       converter(input, path, entity),
     {
@@ -48,10 +63,16 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
       pipe: {
         value<Next>(
           nextConverter: ConverterFunction<Next, Result>,
-          displayName: string = `${name} -> ${getConverterName(nextConverter)}`
+          displayName?: string
         ): Converter<Next, Input> {
+          const createdNextConverter = createConverter(nextConverter);
+          displayName =
+            displayName === undefined
+              ? `${createdConverter.displayName} -> ${createdNextConverter.displayName}`
+              : displayName;
           return createConverter(
-            (input, path, entity) => nextConverter(converter(input, path, entity), path, entity),
+            (input, path, entity) =>
+              createdNextConverter(createdConverter(input, path, entity), path, entity),
             displayName
           );
         },
@@ -62,13 +83,14 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
         value<Other>(
           otherConverter: ConverterFunction<Other, Input>
         ): Converter<Result | Other, Input> {
-          const joinedName = `${name} | ${getConverterName(otherConverter)}`;
+          const createdOtherConverter = createConverter(otherConverter);
+          const joinedName = `${createdConverter.displayName} | ${createdOtherConverter.displayName}`;
           return createConverter((input, path, entity) => {
             try {
-              return converter(input, path, entity);
+              return createdConverter(input, path, entity);
             } catch (err) {
               try {
-                return otherConverter(input, path, entity);
+                return createdOtherConverter(input, path, entity);
               } catch (other) {
                 if (err instanceof ConverterError && other instanceof ConverterError) {
                   // heuristic to figure out which is the more likely branch
@@ -101,12 +123,13 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
         value(
           defaultConverter: ConverterFunction<Input, undefined>
         ): Converter<Result, Input | undefined> {
-          const defaultedName = `${name} with default`;
+          const createdDefaultConverter = createConverter(defaultConverter);
+          const defaultedName = `${createdConverter.displayName} with default`;
           return createConverter((input: Input | undefined, path, entity) => {
             if (input === undefined) {
-              input = defaultConverter(undefined, path, entity);
+              input = createdDefaultConverter(undefined, path, entity);
             }
-            return converter(input as Input, path, entity);
+            return createdConverter(input as Input, path, entity);
           }, defaultedName);
         },
         writable: false,
@@ -114,4 +137,5 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
       }
     }
   );
+  return createdConverter;
 }
