@@ -21,6 +21,10 @@ describe('optional converters', () => {
     const structure = t.strict({ notTest: c });
     expect(structure({})).toEqual({ notTest: undefined });
   });
+  it('allow values in deeper converters to be undefined.', () => {
+    const c = t.optional(t.forPath(['test'], t.string));
+    expect(c({ test: undefined })).toBeUndefined();
+  });
   it.each([undefined, 'test', { name: 'test', count: 2 }])(
     'chains with or correctly given %o',
     (value) => {

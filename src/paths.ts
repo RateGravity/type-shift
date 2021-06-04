@@ -78,10 +78,15 @@ export function forPath(
   targetPath: TargetPathPart[],
   converter: ConverterFunction<unknown, unknown> = UnknownConverter
 ): Converter<unknown, unknown> {
-  return createConverter((_, entityPath, entity) => {
-    const [newEntity, newTarget] = followPath(entity, targetPath, entityPath);
-    return converter(newEntity, newTarget, entity);
-  }, getConverterName(converter));
+  const createdConverter = createConverter(converter);
+  return createConverter(
+    (_, entityPath, entity) => {
+      const [newEntity, newTarget] = followPath(entity, targetPath, entityPath);
+      return createdConverter(newEntity, newTarget, entity);
+    },
+    getConverterName(converter),
+    () => forPath(targetPath, createdConverter.optional)
+  );
 }
 
 /**
@@ -94,25 +99,30 @@ export function forPath(
 export function sub<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
 ): Converter<Result, Input> {
-  return createConverter((value, path) => {
-    const basePath = formatPath(path);
-    try {
-      // invoke the inner converter resetting path and entity
-      return converter(value, [], value);
-    } catch (err) {
-      if (err instanceof ConverterError) {
-        // re-root all the paths
-        const errorKeys = Object.keys(err.errorFields);
-        errorKeys.forEach((key) => {
-          // get the error
-          const error = err.errorFields[key];
-          // delete the existing error
-          delete err.errorFields[key];
-          // rebuild the root key (excluding the leading $)
-          err.errorFields[basePath + key.substr(1)] = error;
-        });
+  const createdConverter = createConverter(converter);
+  return createConverter(
+    (value, path) => {
+      const basePath = formatPath(path);
+      try {
+        // invoke the inner converter resetting path and entity
+        return createdConverter(value, [], value);
+      } catch (err) {
+        if (err instanceof ConverterError) {
+          // re-root all the paths
+          const errorKeys = Object.keys(err.errorFields);
+          errorKeys.forEach((key) => {
+            // get the error
+            const error = err.errorFields[key];
+            // delete the existing error
+            delete err.errorFields[key];
+            // rebuild the root key (excluding the leading $)
+            err.errorFields[basePath + key.substr(1)] = error;
+          });
+        }
+        throw err;
       }
-      throw err;
-    }
-  }, getConverterName(converter));
+    },
+    createdConverter.displayName,
+    () => sub(createdConverter.optional)
+  );
 }

@@ -117,4 +117,15 @@ describe('partial', () => {
       two: 'test'
     });
   });
+  it('allows fields that were undefined in the input to get a default value', () => {
+    const converter = t.partial(
+      t.strict({
+        one: t.string.default(t.forPath(['two']))
+      })
+    );
+    const v = converter({ two: 'test' });
+    expect(v).toEqual({
+      one: 'test'
+    });
+  });
 });
