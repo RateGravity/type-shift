@@ -27,6 +27,21 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
     );
 }
 
+function getOptionalFactory<Result, Input>(
+  converter: ConverterFunction<Result, Input>
+): () => ConverterFunction<Result | undefined, Input | undefined> {
+  if (isConverter(converter)) {
+    return () => converter.optional;
+  } else {
+    return () => (input: Input | undefined, path: Array<string | number>, entity: unknown) => {
+      if (input === undefined) {
+        return undefined;
+      }
+      return converter(input, path, entity);
+    };
+  }
+}
+
 function isConverter<Result, Input>(
   converterFunction: ConverterFunction<Result, Input>
 ): converterFunction is Converter<Result, Input> {
@@ -45,12 +60,14 @@ function isConverter<Result, Input>(
  */
 export function createConverter<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>,
-  name?: string
+  name?: string,
+  optionalFactory?: () => ConverterFunction<Result | undefined, Input | undefined>
 ): Converter<Result, Input> {
-  if (isConverter(converter) && name === undefined) {
+  if (isConverter(converter) && name === undefined && optionalFactory === undefined) {
     return converter;
   }
   name = name === undefined ? getConverterName(converter) : name;
+  optionalFactory = optionalFactory === undefined ? getOptionalFactory(converter) : optionalFactory;
   let optionalCache: Converter<Result | undefined, Input | undefined> | null = null;
   const createdConverter: Converter<Result, Input> = Object.defineProperties(
     (input: Input, path: (string | number)[] = [], entity: unknown = input) =>
@@ -64,14 +81,16 @@ export function createConverter<Result, Input = unknown>(
       optional: {
         get(): Converter<Result | undefined, Input | undefined> {
           if (optionalCache === null) {
-            optionalCache = createConverter((input, path, entity) => {
-              if (input === undefined) {
-                return undefined;
-              }
-              return createdConverter(input, path, entity);
-            }, `optional ${createdConverter.displayName}`);
+            const c = optionalFactory!();
+            optionalCache = isConverter(c)
+              ? c
+              : createConverter<Result | undefined, Input | undefined>(
+                  c,
+                  `optional ${createdConverter.displayName}`,
+                  () => optionalCache!
+                );
           }
-          return optionalCache!
+          return optionalCache!;
         },
         enumerable: true
       },

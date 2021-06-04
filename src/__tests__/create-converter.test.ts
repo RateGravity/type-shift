@@ -203,5 +203,10 @@ describe('createConverter', () => {
       const converter = createConverter(() => 1).optional;
       expect(converter(2)).toBe(1);
     });
+    it('optional optional is the same', () => {
+      const converter = createConverter(() => 1).optional;
+      const doubleOptional = converter.optional;
+      expect(doubleOptional).toBe(converter);
+    })
   });
 });
