@@ -1,5 +1,6 @@
 export * from './basic-types';
 export * from './container';
+export * from './coercers';
 export * from './composers';
 export * from './core';
 export * from './decorators';
