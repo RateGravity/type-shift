@@ -33,8 +33,8 @@ const followPath = (
         const count = targetPath.findIndex((part) => part !== ParentPath, 0);
 
         if (count === -1) {
-          // If we go all the way to the root...
-          targetPath = [];
+          // every item in targetPath is a ParentPath node
+          targetPath = currentPath.slice(0, currentPath.length - targetPath.length);
         } else {
           // Otherwise return currentPath and targetPath merged.
           targetPath = [
