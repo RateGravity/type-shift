@@ -8,5 +8,6 @@ export * from './errors';
 export * from './formatting';
 export * from './func';
 export * from './objects';
+export * from './patch';
 export * from './paths';
 export * from './unions';
