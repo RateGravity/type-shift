@@ -119,6 +119,20 @@ describe('forPath', () => {
       expect(testConverter(testItem).childA.childB.cloneAll).toMatchObject({ childA: 'hey' });
     });
 
+    it('resolves immediate parent', () => {
+      const testConverter = t.strict({
+        child: t.strict({
+          subChild: t.forPath([t.ParentPath], t.shape({ sibling: t.string }))
+        })
+      });
+      const testItem = { child: { sibling: 'test' }};
+      expect(testConverter(testItem)).toMatchObject({
+        child: {
+          subChild: { sibling: 'test' }
+        }
+      });
+    })
+
     it("still resolves '.'", () => {
       const testConverter = t.shape({
         '.': t.string,
