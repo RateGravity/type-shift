@@ -1,4 +1,5 @@
-import { None } from './basic-types';
+import { none, None, undefined as undefinedConverter } from './basic-types';
+import { noneAsNull, noneAsUndefined } from './coercers';
 import { Converter, ConverterFunction, createConverter, getConverterName } from './core';
 
 /**
@@ -8,12 +9,13 @@ import { Converter, ConverterFunction, createConverter, getConverterName } from 
  */
 export function optional<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
-): Converter<Result | undefined, Input | undefined> {
+): Converter<Result | undefined, Input> {
   return createConverter((input, path, entity) => {
-    if (input === undefined) {
-      return undefined;
+    try {
+      return converter(input, path, entity);
+    } catch {
+      return undefinedConverter(input, path, entity);
     }
-    return converter(input, path, entity);
   }, `optional ${getConverterName(converter)}`);
 }
 
@@ -24,17 +26,13 @@ export function optional<Result, Input = unknown>(
  */
 export function noneable<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
-): Converter<Result | None, Input | None> {
+): Converter<Result | None, Input> {
   return createConverter((input, path, entity) => {
-    if (input === undefined) {
-      return undefined;
+    try {
+      return converter(input, path, entity);
+    } catch {
+      return none(input, path, entity);
     }
-
-    if (input === null) {
-      return null;
-    }
-
-    return converter(input, path, entity);
   }, `optional ${getConverterName(converter)}`);
 }
 
@@ -45,12 +43,13 @@ export function noneable<Result, Input = unknown>(
  */
 export function noneableAsNull<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
-): Converter<Result | null, Input | None> {
+): Converter<Result | null, Input> {
   return createConverter((input, path, entity) => {
-    if (input === undefined || input === null) {
-      return null;
+    try {
+      return converter(input, path, entity);
+    } catch {
+      return noneAsNull(input, path, entity);
     }
-    return converter(input, path, entity);
   }, `optional ${getConverterName(converter)}`);
 }
 
@@ -61,11 +60,12 @@ export function noneableAsNull<Result, Input = unknown>(
  */
 export function noneableAsUndefined<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
-): Converter<Result | undefined, Input | None> {
+): Converter<Result | undefined, Input> {
   return createConverter((input, path, entity) => {
-    if (input === undefined || input === null) {
-      return undefined;
+    try {
+      return converter(input, path, entity);
+    } catch {
+      return noneAsUndefined(input, path, entity);
     }
-    return converter(input, path, entity);
   }, `optional ${getConverterName(converter)}`);
 }

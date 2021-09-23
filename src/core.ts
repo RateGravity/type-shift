@@ -173,10 +173,28 @@ export function createConverter<Result, Input = unknown>(
         ): Converter<Result, Input | undefined> {
           const defaultedName = `${name} with default`;
           return createConverter((input: Input | undefined, path, entity) => {
-            if (input === undefined) {
-              input = defaultConverter(undefined, path, entity);
+            let error: ConverterError;
+            try {
+              // Try the original converter
+              input = converter(input as Input, path, entity);
+            } catch (err) {
+              // If an error is thrown, store it, as we will
+              //  throw it if the default value fails.
+              error = err;
             }
-            return converter(input as Input, path, entity);
+            // Check the converted value or converted value for undefined
+            if (input === undefined) {
+              // Attempt to populate a default and verify it matches
+              //   the original converter, then return it.
+              input = defaultConverter(undefined, path, entity);
+              return converter(input as Input, path, entity);
+            } else if (error) {
+              // Throw the error if thrown and we had no
+              //   valid default to fall back to.
+              throw error;
+            }
+            // Return the result.
+            return input;
           }, defaultedName);
         },
         writable: false,

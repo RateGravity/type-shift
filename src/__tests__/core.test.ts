@@ -86,11 +86,11 @@ describe('createConverter', () => {
     more.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
     const converter = t
       .createConverter(() => {
-      throw less;
+        throw less;
       })
       .or(() => {
-      throw more;
-    });
+        throw more;
+      });
     expect(() => converter(0)).toThrow(more);
   });
   it('or thows error with deeper errors', () => {
@@ -98,11 +98,11 @@ describe('createConverter', () => {
     const deep = new t.ConverterError('test', 'not-test', ['field', 0, 'other']);
     const converter = t
       .createConverter(() => {
-      throw shallow;
+        throw shallow;
       })
       .or(() => {
-      throw deep;
-    });
+        throw deep;
+      });
     expect(() => converter(0)).toThrow(deep);
   });
   it('or prefers deeper errors over more errors', () => {
@@ -111,11 +111,11 @@ describe('createConverter', () => {
     const lessDeep = new t.ConverterError('test', 'not-test', ['field', 0, 'other']);
     const converter = t
       .createConverter(() => {
-      throw moreShallow;
+        throw moreShallow;
       })
       .or(() => {
-      throw lessDeep;
-    });
+        throw lessDeep;
+      });
     expect(() => converter(0)).toThrow(lessDeep);
   });
   it('or uses count of errors at max depth', () => {
@@ -127,11 +127,11 @@ describe('createConverter', () => {
     oneDeepest.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
     const converter = t
       .createConverter(() => {
-      throw twoDeepest;
+        throw twoDeepest;
       })
       .or(() => {
-      throw oneDeepest;
-    });
+        throw oneDeepest;
+      });
     expect(() => converter(0)).toThrow(twoDeepest);
   });
   it('or throws new errors if the errors tie depth and count', () => {
@@ -143,11 +143,11 @@ describe('createConverter', () => {
     errorTwo.errorFields['$.other[1]'] = { expected: 'test', actual: 'not-test' };
     const converter = t
       .createConverter(() => {
-      throw errorOne;
+        throw errorOne;
       })
       .or(() => {
-      throw errorTwo;
-    });
+        throw errorTwo;
+      });
     expect.assertions(2);
     try {
       converter(0);
@@ -170,8 +170,8 @@ describe('createConverter', () => {
     const converter = t
       .createConverter((v) => v)
       .default(() => {
-      throw new Error();
-    });
+        throw new Error();
+      });
     expect(() => converter(undefined)).toThrow();
   });
   it("default doesn't invoke default converter if defined", () => {
@@ -200,5 +200,12 @@ describe('createConverter', () => {
       // no-op
     }
     expect(d).not.toHaveBeenCalled();
+  });
+  it("default doesn't return undefined when original converters succeed", () => {
+    const converter = t.shape({
+      one: t.string,
+      two: t.forPath([t.ParentPath, 'one'], t.string).default(() => 5)
+    });
+    expect(converter({ one: 'hello', two: undefined })).toEqual({ one: 'hello', two: 'hello' });
   });
 });

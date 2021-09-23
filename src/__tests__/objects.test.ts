@@ -117,4 +117,17 @@ describe('partial', () => {
       two: 'test'
     });
   });
+  it('will attempt wrapped converters before returning undefined', () => {
+    const converter = t.partial(
+      t.shape({
+        one: t.string,
+        two: t.forPath([t.ParentPath, 'one'], t.string)
+      })
+    );
+    const v = converter({ one: 'one', two: 'two' });
+    expect(v).toEqual({
+      one: 'one',
+      two: 'one'
+    });
+  });
 });
