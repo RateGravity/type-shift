@@ -13,6 +13,7 @@ export class ConverterError extends Error {
 
   constructor(actual: unknown, expected: string, path: (string | number)[]) {
     super(`At Path ${formatPath(path)}, expected ${expected} but was ${displayValue(actual)}`);
+    this.name = 'ConverterError';
     this.errorFields = {
       [formatPath(path)]: {
         expected,
