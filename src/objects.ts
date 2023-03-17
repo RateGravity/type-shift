@@ -9,7 +9,9 @@ import { ConverterError } from './errors';
  */
 export interface ShapeConverter<S extends object> extends Converter<S, unknown> {
   readonly strict: boolean;
-  readonly converters: { [K in keyof S]: Converter<S[K], unknown> };
+  readonly converters: {
+    [K in keyof Required<S>]: Converter<S[K], unknown>;
+  };
 }
 
 /**
@@ -17,7 +19,7 @@ export interface ShapeConverter<S extends object> extends Converter<S, unknown> 
  * @param converters - an object structure describing the resulting value
  */
 export function strict<S extends object>(
-  converters: { [K in keyof S]: ConverterFunction<S[K], unknown> }
+  converters: { [K in keyof Required<S>]: ConverterFunction<S[K], unknown> }
 ): ShapeConverter<S> {
   const name = `{${(Object.keys(converters) as (keyof S)[])
     .map((key) => `${key}: ${getConverterName(converters[key])}`)
@@ -85,7 +87,7 @@ export function strict<S extends object>(
  * @param converters - an object structure describing the resulting value
  */
 export function shape<S extends object>(
-  converters: { [K in keyof S]: ConverterFunction<S[K], unknown> }
+  converters: { [K in keyof Required<S>]: ConverterFunction<S[K], unknown> }
 ): ShapeConverter<S> {
   const converter = strict(converters);
   return Object.defineProperties(
