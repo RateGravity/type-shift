@@ -25,7 +25,7 @@
     "format": "prettier --write 'src/**/*.{ts,js,json}'",
     "lint": "yarn prebuild:lint",
     "test": "yarn prebuild:test",
-    "type-check": "prebuild:typecheck"
+    "type-check": "yarn prebuild:typecheck"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
