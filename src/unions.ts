@@ -7,7 +7,7 @@ import { displayValue } from './formatting';
  * This uses triple equality (===) to compare
  */
 export function oneOf<V extends string | number | boolean | undefined | null>(
-  options: V[]
+  options: V[] | readonly V[]
 ): Converter<V, unknown> {
   const name = options.map((v) => displayValue(v)).join(' | ');
   return createConverter((value, path) => {
