@@ -125,13 +125,13 @@ describe('forPath', () => {
           subChild: t.forPath([t.ParentPath], t.shape({ sibling: t.string }))
         })
       });
-      const testItem = { child: { sibling: 'test' }};
+      const testItem = { child: { sibling: 'test' } };
       expect(testConverter(testItem)).toMatchObject({
         child: {
           subChild: { sibling: 'test' }
         }
       });
-    })
+    });
 
     it("still resolves '.'", () => {
       const testConverter = t.shape({
