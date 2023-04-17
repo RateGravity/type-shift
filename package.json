@@ -16,6 +16,7 @@
     "build:rollup": "rollup --config rollup.config.js",
     "build:typedef": "tsc --build ./tsconfig.build.json",
     "build": "yarn build:clean && yarn build:typedef && yarn build:rollup",
+    "deploy": "node ./scripts/deploy.js",
     "prebuild": "yarn prebuild:typecheck && yarn prebuild:lint && yarn prebuild:test",
     "prebuild:lint": "eslint src --ext js,ts,tsx,jsx,json",
     "prebuild:typecheck": "tsc",
