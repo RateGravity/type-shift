@@ -9,7 +9,7 @@ import { displayValue } from './formatting';
 export function oneOf<V extends string | number | boolean | undefined | null>(
   options: V[] | readonly V[]
 ): Converter<V, unknown> {
-  const name = options.map((v) => displayValue(v)).join(' | ');
+  const name = options.map((v: V) => displayValue(v)).join(' | ');
   return createConverter((value, path) => {
     if (options.includes(value as V)) {
       return value as V;

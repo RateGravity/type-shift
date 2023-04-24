@@ -1,0 +1,28 @@
+name: Deploy Package
+
+on:
+  push:
+    tags: v*
+
+jobs:
+  DeployPackage:
+    needs: DeployPackage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking out repository
+        uses: actions/checkout@v3
+
+      - name: Yarn Install
+        run: yarn install
+        shell: bash
+
+      - name: Build
+        run: yarn build
+        shell: bash
+
+      - name: Deploy Package
+        run: yarn deploy
+        shell: bash
+
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
