@@ -6,7 +6,6 @@ on:
 
 jobs:
   DeployPackage:
-    needs: DeployPackage
     runs-on: ubuntu-latest
     steps:
       - name: Checking out repository
