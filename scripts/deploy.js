@@ -42,6 +42,11 @@ const prepareArtifacts = () => {
  */
 const publishPackage = () => {
   console.log('Performing npm publication of package.');
+  // Write the npmrc file containing our auth token.
+  fs.writeFileSync(
+    path.join(__dirname, '..', '.npmrc'),
+    `//registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}`
+  );
   exec(
     `npm publish`,
     {

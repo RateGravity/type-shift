@@ -6,11 +6,16 @@ on:
 
 jobs:
   DeployPackage:
-    needs: DeployPackage
     runs-on: ubuntu-latest
     steps:
       - name: Checking out repository
         uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
 
       - name: Yarn Install
         run: yarn install
