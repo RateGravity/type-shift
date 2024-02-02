@@ -1,6 +1,6 @@
 import { displayValue } from './formatting';
 import { Converter } from './core';
-import { None, none } from './basic-types';
+import { none } from './basic-types';
 
 /**
  * Given a set of converters if one succeeds at converting the input return the
@@ -21,9 +21,9 @@ export const coerce = <V>(
 /**
  * A coercer that coerces values of None type to a null literal
  */
-export const noneAsNull: Converter<None> = coerce([none], null);
+export const noneAsNull: Converter<null> = coerce([none], null);
 
 /**
  * A coercer that coerces values of None type to an undefined literal
  */
-export const noneAsUndefined: Converter<None> = coerce([none], undefined);
+export const noneAsUndefined: Converter<undefined> = coerce([none], undefined);
