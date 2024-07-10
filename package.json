@@ -26,7 +26,8 @@
     "format": "prettier --write 'src/**/*.{ts,js,json}'",
     "lint": "yarn prebuild:lint",
     "test": "yarn prebuild:test",
-    "type-check": "yarn prebuild:typecheck"
+    "type-check": "yarn prebuild:typecheck",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -46,8 +47,8 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.1.5",
     "eslint-plugin-prettier": "^3.3.1",
+    "husky": "^9.0.11",
     "jest": "^25.4.0",
-    "pre-commit": "^1.2.2",
     "prettier": "^2.0.5",
     "rollup": "^2.51.0",
     "rollup-plugin-dts": "^3.0.2",
@@ -55,5 +56,6 @@
   },
   "pre-commit": [
     "lint"
-  ]
+  ],
+  "packageManager": "yarn@4.3.1"
 }
