@@ -1,5 +1,6 @@
+import { None } from './basic-types';
 import { Converter, ConverterFunction, createConverter, getConverterName } from './core';
-import { optional } from './decorators';
+import { Decorator, noneable, noneableAsNull, noneableAsUndefined, optional } from './decorators';
 import { ConverterError } from './errors';
 
 /**
@@ -7,10 +8,10 @@ import { ConverterError } from './errors';
  * converters that were used to create it. This allows for these
  * converters to be spread, in order to inherit them.
  */
-export interface ShapeConverter<S extends object> extends Converter<S, unknown> {
+export interface ShapeConverter<Result extends object> extends Converter<Result, unknown> {
   readonly strict: boolean;
   readonly converters: {
-    [K in keyof Required<S>]: Converter<S[K], unknown>;
+    [K in keyof Required<Result>]: Converter<Result[K], unknown>;
   };
 }
 
@@ -121,6 +122,40 @@ export function shape<S extends object>(
 }
 
 /**
+ * Given a shape and converter, wraps all members of the shape in that
+ *   converter.
+ *
+ * If the given shape converter was created with the t.strict creator
+ *   the resulting partial will also be strict
+ * @param converter - the shape converter to make partial
+ */
+export function decorate<Result, Input = unknown>(decorator: Decorator<Result, Input>) {
+  return <S extends object>(converter: ShapeConverter<S>): ShapeConverter<S> => {
+    if (converter.strict) {
+      return strict(
+        Object.keys(converter.converters).reduce(
+          (l, key) => ({
+            ...l,
+            [key]: decorator((converter.converters as any)[key])
+          }),
+          {} as any
+        )
+      );
+    } else {
+      return shape(
+        Object.keys(converter.converters).reduce(
+          (l, key) => ({
+            ...l,
+            [key]: decorator((converter.converters as any)[key])
+          }),
+          {} as any
+        )
+      );
+    }
+  };
+}
+
+/**
  * Given a shape converter turns all converters into optionals.
  *
  * If the given shape converter was created with the t.strict creator
@@ -130,25 +165,44 @@ export function shape<S extends object>(
 export function partial<S extends object>(
   converter: ShapeConverter<S>
 ): ShapeConverter<{ [K in keyof S]: S[K] | undefined }> {
-  if (converter.strict) {
-    return strict(
-      Object.keys(converter.converters).reduce(
-        (l, key) => ({
-          ...l,
-          [key]: optional((converter.converters as any)[key])
-        }),
-        {} as any
-      )
-    );
-  } else {
-    return shape(
-      Object.keys(converter.converters).reduce(
-        (l, key) => ({
-          ...l,
-          [key]: optional((converter.converters as any)[key])
-        }),
-        {} as any
-      )
-    );
-  }
+  return decorate(optional)(converter);
+}
+
+/**
+ * Given a shape converter turns all converters into noneable.
+ *
+ * If the given shape converter was created with the t.strict creator
+ * the resulting partial will also be strict
+ * @param converter - the shape converter to wrap all fields in noneable
+ */
+export function nonish<S extends object>(
+  converter: ShapeConverter<S>
+): ShapeConverter<{ [K in keyof S]: S[K] | None }> {
+  return decorate(noneable)(converter);
+}
+
+/**
+ * Given a shape converter turns all converters into noneableAsUndefined.
+ *
+ * If the given shape converter was created with the t.strict creator
+ * the resulting partial will also be strict
+ * @param converter - the shape converter to wrap all fields in noneableAsUndefined
+ */
+export function nonishAsUndefined<S extends object>(
+  converter: ShapeConverter<S>
+): ShapeConverter<{ [K in keyof S]: S[K] | undefined }> {
+  return decorate(noneableAsUndefined)(converter);
+}
+
+/**
+ * Given a shape converter turns all converters into noneableAsNull.
+ *
+ * If the given shape converter was created with the t.strict creator
+ * the resulting partial will also be strict
+ * @param converter - the shape converter to wrap all fields in noneableAsNull
+ */
+export function nonishAsNull<S extends object>(
+  converter: ShapeConverter<S>
+): ShapeConverter<{ [K in keyof S]: S[K] | null }> {
+  return decorate(noneableAsNull)(converter);
 }

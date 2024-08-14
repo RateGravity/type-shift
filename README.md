@@ -73,11 +73,20 @@ These converters match their elements against a given converter.
 
 - `strict(<{ [key]: converter function }>)` - Given an object of keys to converters creates a converter that matches input keys with the declared converters and returns the resulting object. Only declared keys are returned.
 - `shape(<{ [key]: converter function }>)` - Same as strict but any keys present on the input that are not declared are also returned.
-- `partial(<strict or shape>)` - Given either a strict or shape converter makes every field optional, maintains strictness.
+
+### Decorators
+
 - `optional(<converter function>)` - Create a converter function that passes undefined input around the inner converter, useful for marking optional fields in objects.
 - `noneable(<converter function>)` - Create a converter function that passes undefined or null input around the inner converter, useful for marking optional fields in objects.
 - `noneableAsNull(<converter function>)` - Create a converter function that coerces undefined or null input to null around the inner converter, useful for marking optional fields in objects.
 - `noneableAsUndefined(<converter function>)` - Create a converter function that coerces undefined or null input to undefined around the inner converter, useful for marking optional fields in objects.
+
+#### Decorated Objects
+
+- `partial(<strict or shape>)` - Given either a strict or shape converter makes every field `optional`, maintains strictness.
+- `nonish(<strict or shape>)` - Given either a strict or shape converter makes every field `noneable`, maintains strictness.
+- `nonishAsNull(<strict or shape>)` - Given either a strict or shape converter makes every field `noneableAsNull`, maintains strictness.
+- `nonishAsUndefined(<strict or shape>)` - Given either a strict or shape converter makes every field `noneableAsUndefined`, maintains strictness.
 
 ### Paths
 

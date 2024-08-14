@@ -95,26 +95,80 @@ describe('shape', () => {
   });
 });
 
-describe('partial', () => {
-  it('makes all fields optional', () => {
-    const converter = t.partial(
-      t.strict({
-        one: t.string
-      })
-    );
-    const v = converter({});
-    expect(v.one).not.toBeDefined();
+describe('decorate', () => {
+  describe('partial', () => {
+    it('applies the decorator to all fields', () => {
+      const converter = t.decorate(t.optional)(
+        t.shape({
+          one: t.string
+        })
+      );
+      const v = converter({});
+      expect(v.one).not.toBeDefined();
+    });
+
+    it('preserves strictness', () => {
+      const converter = t.decorate(t.optional)(
+        t.shape({
+          one: t.string
+        })
+      );
+      const v = converter({ two: 'test' });
+      expect(v).toEqual({
+        one: undefined,
+        two: 'test'
+      });
+    });
   });
-  it('preserves strictness', () => {
-    const converter = t.partial(
-      t.shape({
-        one: t.string
-      })
-    );
-    const v = converter({ two: 'test' });
-    expect(v).toEqual({
-      one: undefined,
-      two: 'test'
+
+  describe('partial', () => {
+    it('makes all fields optional', () => {
+      const converter = t.partial(
+        t.strict({
+          one: t.string
+        })
+      );
+      const v = converter({});
+      expect(v.one).not.toBeDefined();
+    });
+  });
+
+  describe('nonish', () => {
+    it('makes all fields noneable', () => {
+      const converter = t.nonish(
+        t.shape({
+          one: t.string,
+          two: t.string
+        })
+      );
+      const v = converter({ two: null });
+      expect(v).toEqual({ one: undefined, two: null });
+    });
+  });
+
+  describe('nonishAsUndefined', () => {
+    it('makes all fields noneableAsUndefined', () => {
+      const converter = t.nonishAsUndefined(
+        t.shape({
+          one: t.string,
+          two: t.string
+        })
+      );
+      const v = converter({ two: null });
+      expect(v).toEqual({ one: undefined, two: undefined });
+    });
+  });
+
+  describe('nonishAsNull', () => {
+    it('makes all fields nonishAsNull', () => {
+      const converter = t.nonishAsNull(
+        t.shape({
+          one: t.string,
+          two: t.string
+        })
+      );
+      const v = converter({ two: null });
+      expect(v).toEqual({ one: null, two: null });
     });
   });
 });
