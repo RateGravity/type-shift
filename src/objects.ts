@@ -53,7 +53,7 @@ export function strict<S extends object>(
         .reduce((acc, obj) => ({ ...acc, ...obj }), {}) as S;
       if (errors.length > 0) {
         throw errors.reduce((l, r) => {
-          Object.assign(l.errorFields, r.errorFields);
+          l.issues.push(...r.issues);
           return l;
         });
       }

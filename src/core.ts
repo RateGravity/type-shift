@@ -1,17 +1,9 @@
 import { ConverterError } from './errors';
 
-// count the number of dots or open brackets
-// this avoids complex path parsing while getting a "good enough" hueristic
-function guessPathLength(formattedPath: string): number {
-  return Array.from(formattedPath)
-    .map((v) => (v === '.' || v === '[' ? 1 : 0))
-    .reduce((l: number, r: number): number => l + r, 0);
-}
-
 // find the count of errors at the max depth.
 function maxDepthCount(error: ConverterError): { depth: number; count: number } {
-  return Object.keys(error.errorFields)
-    .map(guessPathLength)
+  return error.issues
+    .map(({ path }) => path.length)
     .reduce(
       (max: { depth: number; count: number }, d) => {
         if (d === max.depth) {
