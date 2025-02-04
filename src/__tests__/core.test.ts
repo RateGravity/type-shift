@@ -189,4 +189,50 @@ describe('createConverter', () => {
     }
     expect(d).not.toHaveBeenCalled();
   });
+
+  it('exposes the ~standard schema', () => {
+    const converter = createConverter((value) => value);
+    expect(converter).toHaveProperty(
+      '~standard',
+      expect.objectContaining({
+        version: 1,
+        vendor: 'type-shift',
+        validate: expect.any(Function)
+      })
+    );
+  });
+
+  it('~standard.validate validates the schema', () => {
+    const validator = jest.fn(() => 5);
+    const converter = createConverter(validator);
+    const result = converter['~standard'].validate(1);
+    expect(result).toEqual({ value: 5 });
+  });
+
+  it('~standard.validate passes the input, and root path to the converter', () => {
+    const validator = jest.fn(() => 5);
+    const converter = createConverter(validator);
+    converter['~standard'].validate(1);
+    expect(validator).toHaveBeenCalledWith(1, [], 1);
+  });
+
+  it('~standard.validate returns the issues if the converter throws a ConverterError', () => {
+    const validator = jest.fn(() => {
+      throw new ConverterError('test', 'not-test', ['field', 0]);
+    });
+    const converter = createConverter(validator);
+    const result = converter['~standard'].validate(1);
+    expect(result).toEqual({
+      issues: [{ message: 'expected not-test but was "test"', path: ['field', 0] }]
+    });
+  });
+
+  it('~standard.validate returns the issues if the converter throws a regular error', () => {
+    const validator = jest.fn(() => {
+      throw new Error('test');
+    });
+    const converter = createConverter(validator);
+    const result = converter['~standard'].validate(1);
+    expect(result).toEqual({ issues: [{ message: 'test' }] });
+  });
 });
