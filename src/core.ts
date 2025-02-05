@@ -1,17 +1,11 @@
+import { StandardSchemaV1 } from './standard-schema';
 import { ConverterError } from './errors';
-
-// count the number of dots or open brackets
-// this avoids complex path parsing while getting a "good enough" hueristic
-function guessPathLength(formattedPath: string): number {
-  return Array.from(formattedPath)
-    .map((v) => (v === '.' || v === '[' ? 1 : 0))
-    .reduce((l: number, r: number): number => l + r, 0);
-}
+import { displayValue } from './formatting';
 
 // find the count of errors at the max depth.
 function maxDepthCount(error: ConverterError): { depth: number; count: number } {
-  return Object.keys(error.errorFields)
-    .map(guessPathLength)
+  return error.issues
+    .map(({ path }) => path.length)
     .reduce(
       (max: { depth: number; count: number }, d) => {
         if (d === max.depth) {
@@ -24,6 +18,45 @@ function maxDepthCount(error: ConverterError): { depth: number; count: number } 
       },
       { depth: 0, count: 0 }
     );
+}
+
+/**
+ * Convert a converter function into a StandardSchema validator function
+ * @param converter - the converter function to convert
+ * @returns a validator function
+ */
+function asValidator<Input, Result>(
+  converter: ConverterFunction<Result, Input>
+): StandardSchemaV1.Props<Input, Result>['validate'] {
+  return (input: unknown) => {
+    try {
+      return {
+        // standard schema specifies an input type but then the function uses unknown
+        value: converter(input as Input, [], input)
+      };
+    } catch (error) {
+      if (error instanceof ConverterError) {
+        // convert ConverterError into the StandardSchemaV1.FailureResult
+        return {
+          issues: error.issues.map(({ path, expected, actual }) => ({
+            message: `expected ${expected} but was ${displayValue(actual)}`,
+            path: path
+          }))
+        };
+      }
+      // convert other errors into the FailureResult
+      return {
+        issues: [
+          {
+            message:
+              error !== null && typeof error === 'object' && 'message' in error
+                ? `${error.message}`
+                : `${error}`
+          }
+        ]
+      };
+    }
+  };
 }
 
 /**
@@ -42,7 +75,9 @@ export interface ConverterFunction<Result, Input = unknown> {
 /**
  * A standard Converter function with extended methods
  */
-export interface Converter<Result, Input = unknown> extends ConverterFunction<Result, Input> {
+export interface Converter<Result, Input = unknown>
+  extends ConverterFunction<Result, Input>,
+    StandardSchemaV1<Input, Result> {
   /**
    * The Name of the converter
    */
@@ -178,6 +213,15 @@ export function createConverter<Result, Input = unknown>(
             }
             return converter(input as Input, path, entity);
           }, defaultedName);
+        },
+        writable: false,
+        enumerable: true
+      },
+      '~standard': {
+        value: {
+          version: 1,
+          vendor: 'type-shift',
+          validate: asValidator(converter)
         },
         writable: false,
         enumerable: true

@@ -10,4 +10,15 @@ describe('ConverterError', () => {
       }
     });
   });
+
+  it('exposes issues', () => {
+    const error = new ConverterError(true, 'number', ['a', 0]);
+    expect(error.issues).toEqual([
+      {
+        path: ['a', 0],
+        expected: 'number',
+        actual: true
+      }
+    ]);
+  });
 });

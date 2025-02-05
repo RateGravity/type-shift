@@ -83,7 +83,7 @@ describe('createConverter', () => {
   it('or throws error with more errors', () => {
     const less = new ConverterError('test', 'not-test', ['field', 0]);
     const more = new ConverterError('test', 'not-test', ['field', 0]);
-    more.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    more.issues.push({ path: ['field', 1], expected: 'test', actual: 'not-test' });
     const converter = createConverter(() => {
       throw less;
     }).or(() => {
@@ -103,7 +103,7 @@ describe('createConverter', () => {
   });
   it('or prefers deeper errors over more errors', () => {
     const moreShallow = new ConverterError('test', 'not-test', ['field', 0]);
-    moreShallow.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    moreShallow.issues.push({ path: ['field', 1], expected: 'test', actual: 'not-test' });
     const lessDeep = new ConverterError('test', 'not-test', ['field', 0, 'other']);
     const converter = createConverter(() => {
       throw moreShallow;
@@ -114,11 +114,11 @@ describe('createConverter', () => {
   });
   it('or uses count of errors at max depth', () => {
     const twoDeepest = new ConverterError('test', 'not-test', ['field']);
-    twoDeepest.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
-    twoDeepest.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    twoDeepest.issues.push({ path: ['field', 0], expected: 'test', actual: 'not-test' });
+    twoDeepest.issues.push({ path: ['field', 1], expected: 'test', actual: 'not-test' });
     const oneDeepest = new ConverterError('test', 'not-test', ['field']);
-    oneDeepest.errorFields['$.other'] = { expected: 'test', actual: 'not-test' };
-    oneDeepest.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
+    oneDeepest.issues.push({ path: ['other'], expected: 'test', actual: 'not-test' });
+    oneDeepest.issues.push({ path: ['field', 0], expected: 'test', actual: 'not-test' });
     const converter = createConverter(() => {
       throw twoDeepest;
     }).or(() => {
@@ -128,11 +128,11 @@ describe('createConverter', () => {
   });
   it('or throws new errors if the errors tie depth and count', () => {
     const errorOne = new ConverterError('test', 'not-test', ['field']);
-    errorOne.errorFields['$.field[0]'] = { expected: 'test', actual: 'not-test' };
-    errorOne.errorFields['$.field[1]'] = { expected: 'test', actual: 'not-test' };
+    errorOne.issues.push({ path: ['field', 0], expected: 'test', actual: 'not-test' });
+    errorOne.issues.push({ path: ['field', 1], expected: 'test', actual: 'not-test' });
     const errorTwo = new ConverterError('test', 'not-test', ['other']);
-    errorTwo.errorFields['$.other[0]'] = { expected: 'test', actual: 'not-test' };
-    errorTwo.errorFields['$.other[1]'] = { expected: 'test', actual: 'not-test' };
+    errorTwo.issues.push({ path: ['other', 0], expected: 'test', actual: 'not-test' });
+    errorTwo.issues.push({ path: ['other', 1], expected: 'test', actual: 'not-test' });
     const converter = createConverter(() => {
       throw errorOne;
     }).or(() => {
@@ -188,5 +188,51 @@ describe('createConverter', () => {
       // no-op
     }
     expect(d).not.toHaveBeenCalled();
+  });
+
+  it('exposes the ~standard schema', () => {
+    const converter = createConverter((value) => value);
+    expect(converter).toHaveProperty(
+      '~standard',
+      expect.objectContaining({
+        version: 1,
+        vendor: 'type-shift',
+        validate: expect.any(Function)
+      })
+    );
+  });
+
+  it('~standard.validate validates the schema', () => {
+    const validator = jest.fn(() => 5);
+    const converter = createConverter(validator);
+    const result = converter['~standard'].validate(1);
+    expect(result).toEqual({ value: 5 });
+  });
+
+  it('~standard.validate passes the input, and root path to the converter', () => {
+    const validator = jest.fn(() => 5);
+    const converter = createConverter(validator);
+    converter['~standard'].validate(1);
+    expect(validator).toHaveBeenCalledWith(1, [], 1);
+  });
+
+  it('~standard.validate returns the issues if the converter throws a ConverterError', () => {
+    const validator = jest.fn(() => {
+      throw new ConverterError('test', 'not-test', ['field', 0]);
+    });
+    const converter = createConverter(validator);
+    const result = converter['~standard'].validate(1);
+    expect(result).toEqual({
+      issues: [{ message: 'expected not-test but was "test"', path: ['field', 0] }]
+    });
+  });
+
+  it('~standard.validate returns the issues if the converter throws a regular error', () => {
+    const validator = jest.fn(() => {
+      throw new Error('test');
+    });
+    const converter = createConverter(validator);
+    const result = converter['~standard'].validate(1);
+    expect(result).toEqual({ issues: [{ message: 'test' }] });
   });
 });
