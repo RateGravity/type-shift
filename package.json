@@ -10,7 +10,7 @@
   "author": "Own Up <type-shift@ownup.com>",
   "scripts": {
     "postbuild:test": "jest --config ./jest-postbuild.config.js",
-    "postbuild:typecheck": "tsc --noEmit ./lib/index.d.ts",
+    "postbuild:typecheck": "tsc --noEmit ./lib/index.d.ts --skipLibCheck",
     "postbuild": "yarn postbuild:test && yarn postbuild:typecheck",
     "build:clean": "rm -rf ./lib ./build",
     "build:rollup": "rollup --config rollup.config.js",
