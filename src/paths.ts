@@ -1,7 +1,6 @@
 import { unknown as UnknownConverter } from './basic-types';
 import { Converter, ConverterFunction, createConverter, getConverterName } from './core';
 import { ConverterError } from './errors';
-import { formatPath } from './formatting';
 
 export const CurrentPath = Symbol('.');
 
@@ -94,21 +93,15 @@ export function sub<Result, Input = unknown>(
   converter: ConverterFunction<Result, Input>
 ): Converter<Result, Input> {
   return createConverter((value, path) => {
-    const basePath = formatPath(path);
     try {
       // invoke the inner converter resetting path and entity
       return converter(value, [], value);
     } catch (err) {
       if (err instanceof ConverterError) {
         // re-root all the paths
-        const errorKeys = Object.keys(err.errorFields);
-        errorKeys.forEach((key) => {
-          // get the error
-          const error = err.errorFields[key];
-          // delete the existing error
-          delete err.errorFields[key];
-          // rebuild the root key (excluding the leading $)
-          err.errorFields[basePath + key.substr(1)] = error;
+        err.issues.forEach((issue) => {
+          // prepend the current path to the issue path
+          issue.path = [...path, ...issue.path];
         });
       }
       throw err;

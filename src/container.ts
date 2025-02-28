@@ -40,7 +40,7 @@ export function record<T>(
       .reduce((acc, obj) => ({ ...acc, ...obj }), {}) as Record<string, T>;
     if (errors.length > 0) {
       throw errors.reduce((l, r) => {
-        Object.assign(l.errorFields, r.errorFields);
+        l.issues.push(...r.issues);
         return l;
       });
     }
@@ -74,7 +74,7 @@ export function array<T>(converter: ConverterFunction<T, unknown>): Converter<T[
     });
     if (errors.length > 0) {
       throw errors.reduce((l, r) => {
-        Object.assign(l.errorFields, r.errorFields);
+        l.issues.push(...r.issues);
         return l;
       });
     }
