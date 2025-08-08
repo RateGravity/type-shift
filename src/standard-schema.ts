@@ -3,9 +3,9 @@
 
 /** The Standard Schema interface. */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
-    /** The Standard Schema properties. */
-    readonly "~standard": StandardSchemaV1.Props<Input, Output>;
-  }
+  /** The Standard Schema properties. */
+  readonly '~standard': StandardSchemaV1.Props<Input, Output>;
+}
 
 export declare namespace StandardSchemaV1 {
   /** The Standard Schema properties interface. */
