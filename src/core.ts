@@ -227,5 +227,5 @@ export function createConverter<Result, Input = unknown>(
         enumerable: true
       }
     }
-  );
+  ) as Converter<Result, Input>;
 }

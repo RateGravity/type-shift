@@ -31,7 +31,7 @@ export function taggedUnion<R extends object, Input = unknown>(
     .map((key) => getConverterName(options[key]))
     .join(' | ')}`;
   return createConverter((value, path, entity) => {
-    if (value === null || value === undefined || !(tag in value)) {
+    if (value === null || value === undefined || typeof value !== 'object' || !(tag in value)) {
       throw new ConverterError(value, name, path);
     }
     const v = `${(value as any)[tag]}`;

@@ -23,7 +23,7 @@ export function strict<S extends object>(
   converters: { [K in keyof Required<S>]: ConverterFunction<S[K], unknown> }
 ): ShapeConverter<S> {
   const name = `{${(Object.keys(converters) as (keyof S)[])
-    .map((key) => `${key}: ${getConverterName(converters[key])}`)
+    .map((key) => `${String(key)}: ${getConverterName(converters[key])}`)
     .join(', ')}}`;
   return Object.defineProperties(
     createConverter((value, path, entity) => {
@@ -77,7 +77,7 @@ export function strict<S extends object>(
         writable: false
       }
     }
-  );
+  ) as ShapeConverter<S>;
 }
 
 /**
@@ -118,7 +118,7 @@ export function shape<S extends object>(
         enumerable: true
       }
     }
-  );
+  ) as ShapeConverter<S>;
 }
 
 /**
