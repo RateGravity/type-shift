@@ -54,17 +54,14 @@ const publishPackage = () => {
   );
   const args = prereleaseTags ? ` --tag "${prereleaseTags}"` : [];
   exec(
-    `npm publish ${OUT_DIR}${args}`,
+    `npm publish ${OUT_DIR}${args} --provenance`,
     {
       cwd: process.cwd(),
+      stdio: 'inherit',
       env: {
         ...process.env,
         npm_config_registry: 'https://registry.npmjs.org/' // override yarn's environment settings
       }
-    },
-    (err, stdout, stderr) => {
-      console.log(stdout);
-      console.error(stderr);
     }
   );
 };
