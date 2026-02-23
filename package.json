@@ -1,6 +1,6 @@
 {
   "name": "type-shift",
-  "version": "0.0.1",
+  "version": "0.5.1",
   "description": "Evolutionary Type Converters and Input Validators",
   "repository": "https://github.com/RateGravity/type-shift.git",
   "license": "MIT",
