@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checking out repository
         uses: actions/checkout@v4
@@ -25,6 +26,10 @@ jobs:
 
       - name: Build
         run: yarn build
+        shell: bash
+
+      - name: Check npm version
+        run: npm --version
         shell: bash
 
       - name: Deploy Package
