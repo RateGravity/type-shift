@@ -54,7 +54,7 @@ const publishPackage = () => {
   );
   const args = prereleaseTags ? ` --tag "${prereleaseTags}"` : [];
   exec(
-    `npm publish ${OUT_DIR}${args}`,
+    `npm publish ${OUT_DIR}${args} --provenance`,
     {
       cwd: process.cwd(),
       env: {
